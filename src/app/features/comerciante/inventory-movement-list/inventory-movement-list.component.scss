@@ -1,0 +1,40 @@
+// Base heredada (tarjeta, tabla, botones, modal) + sistema de listados del ERP.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+.kardex-page { max-width: 1440px; }
+
+// El inventario define todo el kardex: pesa el doble que las fechas.
+.filter-grid .field-inventory { grid-column: span 2; }
+
+// ── Panel de contexto del inventario ──────────────────────
+// Reusa `.money-grid`, pero tres de las cuatro celdas son texto, no cifras.
+.money-grid .money-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.money-grid .stock-low {
+  color: var(--badge-inactive-text);
+}
+
+// ── Cantidad con signo ────────────────────────────────────
+// Entrada suma, salida resta. La salida va en azul y no en rojo: es una
+// operación normal del puesto, no un error.
+.qty { font-weight: 600; }
+.qty-in { color: var(--badge-active-text); }
+.qty-out { color: var(--primary-color); }
+.qty-adj { color: var(--text-secondary); }
+
+table tfoot td.qty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  &.qty-in { color: var(--badge-active-text); }
+  &.qty-out { color: var(--primary-color); }
+}
+
+@media (max-width: 720px) {
+  .filter-grid .field-inventory { grid-column: span 1; }
+}

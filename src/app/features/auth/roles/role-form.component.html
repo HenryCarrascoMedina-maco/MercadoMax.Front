@@ -1,0 +1,70 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('rolesPage.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('rolesPage.createTitle')"
+  [subtitle]="isEdit() && record() ? record()!.name : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('common.name') }}<span class="req">*</span></label>
+            <input type="text" formControlName="name" [placeholder]="t('rolesPage.namePlaceholder')" />
+            @if (errorKey('name'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('common.descriptionOptional') }}</label>
+            <input type="text" formControlName="description" [placeholder]="t('rolesPage.descriptionPlaceholder')" />
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body permissions-block">
+        <h3 class="page-section-title">{{ t('rolesPage.selectPermissions') }}</h3>
+        <div class="permissions-grid">
+          @for (entry of groupedAllPermissions(); track entry[0]) {
+            <div class="perm-module-card">
+              <div class="perm-module-header">
+                <label class="module-checkbox">
+                  <input type="checkbox"
+                         [checked]="isModuleAllSelected(entry[1])"
+                         (change)="toggleModulePermissions(entry[1])" />
+                  <strong>{{ entry[0] }}</strong>
+                </label>
+              </div>
+              <div class="perm-module-body">
+                @for (perm of entry[1]; track perm.id) {
+                  <label class="perm-checkbox">
+                    <input type="checkbox"
+                           [checked]="isPermissionSelected(perm.id)"
+                           (change)="togglePermission(perm.id)" />
+                    <span class="perm-label">{{ perm.action }}</span>
+                    <span class="perm-desc-small">{{ perm.description }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.processing') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

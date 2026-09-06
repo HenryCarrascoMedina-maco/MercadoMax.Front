@@ -1,0 +1,68 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('inventory.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('inventory.createTitle')"
+  [subtitle]="isEdit() && record() ? record()!.productName : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('inventory.stallId') }}<span class="req">*</span></label>
+            <input type="number" formControlName="stallId" />
+            @if (errorKey('stallId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventory.productId') }}<span class="req">*</span></label>
+            <input type="number" formControlName="productId" />
+            @if (errorKey('productId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventory.logisticUnitId') }}<span class="req">*</span></label>
+            <input type="number" formControlName="logisticUnitId" />
+            @if (errorKey('logisticUnitId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventory.currentStock') }}<span class="req">*</span></label>
+            <input type="number" formControlName="currentStock" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventory.averageCost') }}<span class="req">*</span></label>
+            <input type="number" step="0.01" formControlName="averageCost" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventory.minimumStock') }}<span class="req">*</span></label>
+            <input type="number" formControlName="minimumStock" />
+            @if (errorKey('minimumStock'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+        </div>
+
+        @if (isEdit()) {
+          <p class="page-hint">{{ t('inventory.editMinStockHint') }}</p>
+        }
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

@@ -1,0 +1,27 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('inventory.title')"
+  [title]="record()?.productName || t('common.view')"
+  [crumb]="record()?.productName || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  <button pageActions type="button" class="btn btn-primary"
+          *hasPermission="'Inventory:Update'"
+          (click)="goToEdit()">
+    {{ t('inventory.editMinStock') }}
+  </button>
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+  }
+</app-form-page>
+</ng-container>

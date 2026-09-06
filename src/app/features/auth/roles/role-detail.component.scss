@@ -1,0 +1,43 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+.permissions-block {
+  border-top: 1px solid var(--border-color);
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.perm-module-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.perm-module-header {
+  padding: 10px 14px;
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+
+  strong {
+    font-size: 13px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.perm-module-body { padding: 8px 0; }
+
+.perm-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 14px;
+
+  .perm-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 70px; }
+  .perm-desc-small { font-size: 11px; color: var(--text-muted); }
+}

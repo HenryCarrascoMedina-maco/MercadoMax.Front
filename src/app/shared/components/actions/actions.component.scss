@@ -1,0 +1,6 @@
+@use '../../styles/erp-list' as *;
+
+:host {
+  display: inline-flex;
+  gap: 4px;
+}

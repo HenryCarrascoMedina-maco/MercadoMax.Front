@@ -1,0 +1,85 @@
+<ng-container *transloco="let t">
+<div class="user-list-page">
+  <div class="page-header">
+    <h1>{{ t('users.title') }}</h1>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('users.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="toolbar">
+    <input
+      type="text"
+      [placeholder]="t('users.searchPlaceholder')"
+      [value]="search()"
+      (input)="onSearch($event)"
+      class="search-input"
+    />
+  </div>
+
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading">{{ t('common.loading') }}</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('common.name') }}</th>
+            <th>{{ t('common.email') }}</th>
+            <th>{{ t('common.phone') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('users.rolesSection') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone || '—' }}</td>
+              <td>
+                <span class="badge badge-toggle" [class.badge-active]="user.status === 1" [class.badge-inactive]="user.status !== 1"
+                  (click)="toggleStatus(user); $event.stopPropagation()"
+                  [title]="user.status === 1 ? 'Clic para desactivar' : 'Clic para activar'">
+                  {{ user.status === 1 ? t('common.active') : t('common.inactive') }}
+                </span>
+              </td>
+              <td>{{ (user.roles | roleName) || '—' }}</td>
+              <td class="actions">
+                <button class="btn-icon" [title]="t('common.view')" (click)="goView(user)">👁️</button>
+                <button class="btn-icon" [title]="t('common.edit')" (click)="goEdit(user)">✏️</button>
+                <button class="btn-icon" [title]="t('common.delete')" (click)="deleteUser(user)">🗑️</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="empty">{{ t('users.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">‹ {{ t('common.prev') }}</button>
+      @for (page of pages; track page) {
+        <button
+          [class.active]="page === currentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      }
+      <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">{{ t('common.next') }} ›</button>
+    </div>
+  }
+</div>
+
+<!-- Modal -->
+</ng-container>

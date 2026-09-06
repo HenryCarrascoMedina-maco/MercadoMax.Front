@@ -1,0 +1,16 @@
+// Base heredada (tarjeta, tabla, botones, modal) + sistema de listados del ERP.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+// Once columnas: necesita más ancho que el resto de los listados.
+.payables-page { max-width: 1520px; }
+
+// La búsqueda pesa el doble: es el filtro que más se usa.
+.filter-grid .field-search { grid-column: span 2; }
+
+// El saldo pendiente es el número que se consulta primero.
+table tfoot td.amount { color: var(--badge-inactive-text); }
+
+@media (max-width: 720px) {
+  .filter-grid .field-search { grid-column: span 1; }
+}

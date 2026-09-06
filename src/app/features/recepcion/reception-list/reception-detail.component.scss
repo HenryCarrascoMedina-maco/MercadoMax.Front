@@ -1,0 +1,31 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// Bloque de lineas dentro de la misma tarjeta.
+.related-block { border-top: 1px solid var(--border-color); }
+
+.related-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+  }
+
+  .related-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.related-block .table-container { box-shadow: none; }
+.related-block table { min-width: 480px; }

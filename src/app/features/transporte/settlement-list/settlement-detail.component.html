@@ -1,0 +1,129 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('settlements.title')"
+  [title]="record()?.carrierName || t('settlements.manage')"
+  [crumb]="record()?.carrierName || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  @if (isPending()) {
+    <button pageActions type="button" class="btn btn-primary" (click)="markAsPaid()">
+      {{ t('settlements.markAsPaid') }}
+    </button>
+  }
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record(); as h) {
+    <div class="page-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ t('settlements.carrier') }}</span>
+          <span class="detail-value">{{ h.carrierName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('settlements.truck') }}</span>
+          <span class="detail-value">{{ h.truckPlate || '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('settlements.tripDate') }}</span>
+          <span class="detail-value mono">{{ h.tripDate | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('settlements.totalAmount') }}</span>
+          <span class="detail-value mono">S/ {{ h.totalAmount | number: '1.2-2' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('common.status') }}</span>
+          <span class="badge"
+                [class.badge-active]="h.settlementStatus === 'Paid'"
+                [class.badge-inactive]="h.settlementStatus === 'Pending'">
+            {{ h.settlementStatus === 'Paid' ? t('settlements.statusPaid') : t('settlements.statusPending') }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body lines-block">
+      <h3 class="page-section-title">{{ t('settlements.detailsTitle') }}</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('settlements.guide') }}</th>
+              <th>{{ t('settlements.logisticUnit') }}</th>
+              <th class="num">{{ t('settlements.quantity') }}</th>
+              <th class="num">{{ t('settlements.unitPrice') }}</th>
+              <th class="num">{{ t('settlements.subtotal') }}</th>
+              <th>{{ t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of details(); track d.id) {
+              <tr>
+                <td>{{ d.guideNumber }}</td>
+                <td>{{ d.logisticUnitName }}</td>
+                <td class="num">{{ d.quantity | number: '1.2-2' }}</td>
+                <td class="num">S/ {{ d.unitPrice | number: '1.2-2' }}</td>
+                <td class="num">S/ {{ d.subtotal | number: '1.2-2' }}</td>
+                <td>
+                  @if (isPending()) {
+                    <button class="btn-icon" [title]="t('common.delete')" (click)="removeDetail(d.id)">🗑️</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="empty">{{ t('settlements.noLines') }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (isPending()) {
+      <div class="page-body add-line-block">
+        <h3 class="page-section-title">{{ t('settlements.addDetail') }}</h3>
+
+        <form [formGroup]="detailForm" (ngSubmit)="addDetail()" class="inline-form">
+          <div class="form-group grow-2">
+            <label>{{ t('settlements.guide') }}<span class="req">*</span></label>
+            <select formControlName="guideId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (g of guides(); track g.id) {
+                <option [value]="g.id">{{ g.guideNumber }} — {{ g.supplierName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group grow-2">
+            <label>{{ t('settlements.logisticUnit') }}<span class="req">*</span></label>
+            <select formControlName="logisticUnitId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (lu of logisticUnits(); track lu.id) {
+                <option [value]="lu.id">{{ lu.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group narrow">
+            <label>{{ t('settlements.quantity') }}<span class="req">*</span></label>
+            <input type="number" formControlName="quantity" min="0.01" step="0.01" />
+          </div>
+
+          <div class="form-group narrow">
+            <label>{{ t('settlements.unitPrice') }}<span class="req">*</span></label>
+            <input type="number" formControlName="unitPrice" min="0" step="0.01" />
+          </div>
+
+          <button type="submit" class="btn btn-primary">{{ t('settlements.addDetail') }}</button>
+        </form>
+      </div>
+    }
+  }
+</app-form-page>
+</ng-container>

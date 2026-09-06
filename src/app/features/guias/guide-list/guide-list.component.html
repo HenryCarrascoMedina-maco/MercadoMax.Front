@@ -1,0 +1,95 @@
+﻿<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <h1>{{ t('guidesPage.title') }}</h1>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('guidesPage.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">{{ msg.text }}</div>
+  }
+
+  <div class="toolbar">
+    <select class="search-input" (change)="onFilterStatus($event)">
+      <option value="">{{ t('guidesPage.allStatuses') }}</option>
+      <option value="Pending">{{ t('guidesPage.statusPending') }}</option>
+      <option value="InTransit">{{ t('guidesPage.statusInTransit') }}</option>
+      <option value="Received">{{ t('guidesPage.statusReceived') }}</option>
+      <option value="WithShortages">{{ t('guidesPage.statusWithShortages') }}</option>
+      <option value="Closed">{{ t('guidesPage.statusClosed') }}</option>
+      <option value="Voided">{{ t('guidesPage.statusVoided') }}</option>
+    </select>
+  </div>
+
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading">{{ t('common.loading') }}</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('guidesPage.guideNumber') }}</th>
+            <th>{{ t('guidesPage.supplier') }}</th>
+            <th>{{ t('guidesPage.carrier') }}</th>
+            <th>{{ t('guidesPage.truck') }}</th>
+            <th>{{ t('guidesPage.shipmentDate') }}</th>
+            <th>{{ t('guidesPage.arrivalEstimated') }}</th>
+            <th>{{ t('guidesPage.linesAndStalls') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.guideNumber }}</td>
+              <td>{{ item.supplierName }}</td>
+              <td>{{ item.carrierName ?? '—' }}</td>
+              <td>{{ item.truckLicensePlate ?? '—' }}</td>
+              <td>{{ item.shipmentDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.estimatedArrivalDate ? (item.estimatedArrivalDate | date:'dd/MM/yyyy') : '—' }}</td>
+              <td>
+                <!-- Dos cifras distintas: líneas de producto y puestos (subguías). -->
+                <button class="btn-link reparto" (click)="goView(item)"
+                        [title]="t('guidesPage.breakdownTitle', { lines: item.detailCount, stalls: item.stallCount })">
+                  <span class="badge badge-info">{{ item.detailCount }}</span>
+                  <span class="reparto-sep" aria-hidden="true">/</span>
+                  <span class="badge badge-stalls">{{ item.stallCount }}</span>
+                </button>
+              </td>
+              <td>
+                <span class="badge" [class]="statusBadgeClass(item.guideStatus)">
+                  {{ t('guidesPage.status' + item.guideStatus) }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn-icon" [title]="t('guidesPage.actionView')" (click)="goView(item)">🔍</button>
+                @if (item.guideStatus === 'Pending') {
+                  <button class="btn-icon" [title]="t('guidesPage.actionMarkInTransit')" (click)="updateStatus(item, 'InTransit')">🚚</button>
+                }
+                @if (item.guideStatus === 'InTransit') {
+                  <button class="btn-icon" [title]="t('guidesPage.actionMarkReceived')" (click)="updateStatus(item, 'Received')">✅</button>
+                }
+                @if (item.guideStatus !== 'Voided' && item.guideStatus !== 'Received' && item.guideStatus !== 'Closed') {
+                  <button class="btn-icon" [title]="t('guidesPage.actionVoid')" (click)="voidGuide(item)">❌</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="9" class="empty">{{ t('guidesPage.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button class="btn btn-secondary" [disabled]="pageNumber() <= 1" (click)="prevPage()">← {{ t('common.prev') }}</button>
+        <span>{{ t('common.page') }} {{ pageNumber() }} — {{ totalRecords() }} {{ t('common.records') }}</span>
+        <button class="btn btn-secondary" [disabled]="pageNumber() * pageSize() >= totalRecords()" (click)="nextPage()">{{ t('common.next') }} →</button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ═══ CREATE WIZARD MODAL ═══ -->
+</ng-container>
+

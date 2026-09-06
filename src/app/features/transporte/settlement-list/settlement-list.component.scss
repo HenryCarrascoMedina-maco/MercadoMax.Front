@@ -1,0 +1,13 @@
+// Esta pantalla se quedó sin la base común y por eso salía en crudo: el botón,
+// la tabla, los badges y el estado vacío usan clases que solo definen estos dos
+// partials. Es la misma pareja que importan Ventas y Cuentas por Pagar.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+// Ancho propio de las columnas. El resto del aspecto ya viene de los partials.
+table {
+  th.col-id, td.col-id { width: 1%; }
+
+  // La columna se ajusta a sus botones y no los parte en dos líneas.
+  th.col-actions, td.col-actions { width: 1%; white-space: nowrap; }
+}

@@ -1,0 +1,74 @@
+<ng-container *transloco="let t">
+<section class="master-list">
+  <div class="list-header">
+    <h2>{{ t('shortages.title') }}</h2>
+    <div class="list-actions">
+      <select class="filter-select" (change)="onFilterStatus($event)">
+        <option value="">{{ t('shortages.allStatuses') }}</option>
+        <option value="Registrado">{{ t('shortages.statusRegistered') }}</option>
+        <option value="EnRevision">{{ t('shortages.statusInReview') }}</option>
+        <option value="Aceptado">{{ t('shortages.statusAccepted') }}</option>
+        <option value="Rechazado">{{ t('shortages.statusRejected') }}</option>
+      </select>
+      <button class="btn btn-primary" (click)="goCreate()">{{ t('shortages.new') }}</button>
+    </div>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="table-container">
+    @if (loading()) {
+      <p class="loading-text">{{ t('common.loading') }}</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('shortages.product') }}</th>
+            <th>{{ t('shortages.quantity') }}</th>
+            <th>{{ t('shortages.reason') }}</th>
+            <th>{{ t('shortages.claimStatus') }}</th>
+            <th>{{ t('shortages.evidence') }}</th>
+            <th>{{ t('common.date') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.shortageQuantity }}</td>
+              <td>{{ item.reason }}</td>
+              <td><span [class]="claimBadgeClass(item.claimStatus)">{{ item.claimStatus }}</span></td>
+              <td>{{ item.evidence }}</td>
+              <td>{{ item.createdAt | date: 'dd/MM/yyyy' }}</td>
+              <td class="actions">
+                @if (item.claimStatus === 'Registrado') {
+                  <button class="btn btn-sm btn-info" (click)="updateClaimStatus(item, 'EnRevision')">{{ t('common.review') }}</button>
+                }
+                @if (item.claimStatus === 'EnRevision') {
+                  <button class="btn btn-sm btn-success" (click)="updateClaimStatus(item, 'Aceptado')">{{ t('common.accept') }}</button>
+                  <button class="btn btn-sm btn-delete" (click)="updateClaimStatus(item, 'Rechazado')">{{ t('common.reject') }}</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="empty">{{ t('shortages.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button class="btn btn-sm" [disabled]="pageNumber() <= 1" (click)="prevPage()">← {{ t('common.prev') }}</button>
+        <span>{{ t('common.page') }} {{ pageNumber() }} — {{ totalRecords() }} {{ t('common.records') }}</span>
+        <button class="btn btn-sm" [disabled]="pageNumber() * pageSize() >= totalRecords()" (click)="nextPage()">{{ t('common.next') }} →</button>
+      </div>
+    }
+  </div>
+</section>
+</ng-container>

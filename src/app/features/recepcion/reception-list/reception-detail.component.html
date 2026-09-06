@@ -1,0 +1,55 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('receptions.title')"
+  [title]="record()?.guideNumber || t('common.view')"
+  [crumb]="record()?.guideNumber || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+
+    <div class="page-body related-block">
+      <div class="related-head">
+        <h3>{{ t('receptions.details') }}</h3>
+        <span class="related-count">{{ details().length }} {{ t('common.records') }}</span>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('shortages.product') }}</th>
+              <th>{{ t('inventory.logisticUnit') }}</th>
+              <th>{{ t('receptions.expectedQuantity') }}</th>
+              <th>{{ t('receptions.receivedQuantity') }}</th>
+              <th>{{ t('receptions.condition') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of details(); track d.id) {
+              <tr>
+                <td>{{ d.productName }}</td>
+                <td>{{ d.logisticUnitName }}</td>
+                <td>{{ d.expectedQuantity }}</td>
+                <td>{{ d.receivedQuantity }}</td>
+                <td>{{ d.condition || '—' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="empty">{{ t('common.noResults') }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</app-form-page>
+</ng-container>

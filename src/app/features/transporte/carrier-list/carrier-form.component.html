@@ -1,0 +1,98 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('carriers.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('carriers.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <!-- El usuario va primero: de él salen el nombre y el apellido. -->
+        <div class="page-grid">
+          <div class="form-group span-2">
+            <label>{{ t('carriers.user') }}<span class="req">*</span></label>
+
+            <!-- Una cuenta = un transportista. Las ya usadas van al final, en el
+                 grupo deshabilitado: el navegador las pinta en gris y no las deja
+                 elegir, pero siguen a la vista y dicen por qué. -->
+            <select formControlName="userId" (change)="onUserChange()"
+                    [attr.disabled]="choices().allTaken ? true : null">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+
+              @for (u of choices().available; track u.id) {
+                <option [value]="u.id">
+                  {{ u.label }}@if (isCurrentUser(u.id)) { — {{ t('common.current') }}}
+                </option>
+              }
+
+              @if (choices().used.length) {
+                <optgroup [label]="t('common.alreadyAssigned')">
+                  @for (u of choices().used; track u.id) {
+                    <option [value]="u.id" disabled>{{ u.label }} — {{ u.usedBy }}</option>
+                  }
+                </optgroup>
+              }
+            </select>
+
+            @if (errorKey('userId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+
+            @if (choices().allTaken) {
+              <span class="field-error">{{ t('carriers.allCarrierUsersTaken') }}</span>
+            } @else if (!choices().available.length && !choices().used.length) {
+              <span class="field-hint">{{ t('carriers.noCarrierUsers') }}</span>
+            } @else {
+              <span class="field-hint">{{ t('carriers.userHint') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('common.name') }}</label>
+            <input formControlName="firstName" [placeholder]="t('carriers.fromUserPlaceholder')" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('carriers.lastName') }}</label>
+            <input formControlName="lastName" [placeholder]="t('carriers.fromUserPlaceholder')" />
+          </div>
+
+          <div class="form-group span-2">
+            <span class="field-hint">{{ t('carriers.nameFromUserHint') }}</span>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('carriers.document') }}<span class="req">*</span></label>
+            <input formControlName="documentId" [placeholder]="t('carriers.documentPlaceholder')" />
+            @if (errorKey('documentId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('carriers.licenseNumber') }}<span class="req">*</span></label>
+            <input formControlName="licenseNumber" [placeholder]="t('carriers.licensePlaceholder')" />
+            @if (errorKey('licenseNumber'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('common.phone') }}</label>
+            <input formControlName="phone" [placeholder]="t('common.phone')" />
+            <span class="field-hint">{{ t('carriers.phoneHint') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

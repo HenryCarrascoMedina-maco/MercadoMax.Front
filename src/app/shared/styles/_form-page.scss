@@ -1,0 +1,141 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Cuerpo de las páginas de crear/ver/editar.
+//
+// Estas reglas tienen que vivir en la feature (no en `form-page.component.scss`)
+// porque el contenido va proyectado dentro de `<app-form-page>` y la
+// encapsulación emulada lo marca con el atributo del componente que lo escribe.
+//
+//   @use '../../../shared/styles/form-page' as *;
+//
+// Equivalen a `.modal-body` / `.modal-footer`, pero a ancho de página: los campos
+// se reparten en rejilla en vez de apilarse en una columna de 520px.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.page-body {
+  padding: 24px;
+}
+
+.page-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+// Rejilla de campos. Sustituye a `.form-row`, que era una fila fija de dos:
+// aquí el número de columnas lo decide el ancho disponible.
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 22px;
+
+  // `.form-group` ya trae su propio margin-bottom desde `_master-list.scss`.
+  > .span-2 { grid-column: 1 / -1; }
+  > .span-all { grid-column: 1 / -1; }
+}
+
+// ── Validación ────────────────────────────────────────────
+// `_master-list.scss` no define ninguna de las dos (solo existen en
+// `_erp-list.scss`), así que sin esto el asterisco y el error salen en negro.
+.req {
+  color: #e53935;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #e53935;
+}
+
+.form-group {
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched,
+  textarea.ng-invalid.ng-touched { border-color: #e53935; }
+}
+
+// Aclaración bajo un campo (a quién se puede elegir, de dónde sale la lista).
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+// Aclaración breve al inicio o al pie del cuerpo (ej. "los campos con * ...").
+.page-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+
+  // Cuando cierra el bloque, el aire va arriba.
+  &:last-child { margin: 14px 0 0; }
+}
+
+// Título de bloque dentro del formulario ("Datos de contacto", "Detalle").
+.page-section-title {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+}
+
+.page-section + .page-section {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-color);
+}
+
+// ── Ficha de solo lectura (modo ver) ──────────────────────
+// Etiqueta pequeña arriba, dato debajo. Se lee de un vistazo y no finge ser un
+// formulario editable, que era el efecto de deshabilitar los inputs.
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px 28px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  &.span-2 { grid-column: 1 / -1; }
+
+  .detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .detail-value {
+    font-size: 15px;
+    color: var(--text-primary);
+    word-break: break-word;
+
+    &.is-empty { color: var(--text-muted); font-style: italic; }
+    &.mono { font-variant-numeric: tabular-nums; }
+  }
+
+  .badge { align-self: flex-start; }
+}
+
+.page-loading {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .page-body { padding: 18px 16px; }
+  .page-footer { padding: 14px 16px; }
+  .page-footer .btn { flex: 1; }
+}

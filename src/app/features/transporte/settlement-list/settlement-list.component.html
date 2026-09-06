@@ -1,0 +1,143 @@
+<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>{{ t('settlements.title') }}</h1>
+      @if (!loading()) {
+        <span class="record-count">{{ totalRecords() }} {{ t('common.records') }}</span>
+      }
+    </div>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('settlements.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <!-- ── Panel de filtros ───────────────────────────────── -->
+  <section class="filter-card">
+    <div class="filter-card-head">
+      <span class="filter-card-title">{{ t('settlements.filters') }}</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-chip">{{ t('settlements.activeFilters', { count: activeFilterCount() }) }}</span>
+      }
+      <button type="button" class="btn-link" [disabled]="activeFilterCount() === 0" (click)="clearFilters()">
+        {{ t('settlements.clearFilters') }}
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="field">
+        <label>{{ t('common.status') }}</label>
+        <select [value]="filterStatus()"
+                (change)="filterStatus.set($any($event.target).value); applyFilters()">
+          <option value="">{{ t('settlements.allStatuses') }}</option>
+          <option value="Pending">{{ t('settlements.statusPending') }}</option>
+          <option value="Paid">{{ t('settlements.statusPaid') }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('settlements.carrier') }}</label>
+        <select [value]="filterCarrierId() ?? ''"
+                (change)="filterCarrierId.set($any($event.target).value ? +$any($event.target).value : null); applyFilters()">
+          <option value="">{{ t('settlements.allCarriers') }}</option>
+          @for (c of carriers(); track c.id) {
+            <option [value]="c.id">{{ c.firstName }} {{ c.lastName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('settlements.from') }}</label>
+        <input type="date" [value]="filterDateFrom()"
+               (change)="filterDateFrom.set($any($event.target).value); applyFilters()" />
+      </div>
+
+      <div class="field">
+        <label>{{ t('settlements.to') }}</label>
+        <input type="date" [value]="filterDateTo()"
+               (change)="filterDateTo.set($any($event.target).value); applyFilters()" />
+      </div>
+    </div>
+  </section>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">{{ t('common.id') }}</th>
+          <th>{{ t('settlements.carrier') }}</th>
+          <th>{{ t('settlements.truck') }}</th>
+          <th class="nowrap">{{ t('settlements.tripDate') }}</th>
+          <th class="num">{{ t('settlements.totalAmount') }}</th>
+          <th class="num">{{ t('settlements.detailCount') }}</th>
+          <th>{{ t('common.status') }}</th>
+          <th class="col-actions">{{ t('common.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <!-- Filas fantasma: la tabla mantiene el alto y no salta al llegar los datos. -->
+          @for (row of skeletonRows; track $index) {
+            <tr class="skeleton">
+              @for (cell of skeletonCells; track $index) { <td><span class="bar"></span></td> }
+            </tr>
+          }
+        } @else {
+          @for (item of items(); track item.id) {
+            <tr>
+              <td class="num mono">{{ item.id }}</td>
+              <td>{{ item.carrierName }}</td>
+              <td [class.muted]="!item.truckPlate">{{ item.truckPlate || '—' }}</td>
+              <td class="nowrap mono">{{ item.tripDate | date: 'dd/MM/yyyy' }}</td>
+              <td class="num amount">S/ {{ item.totalAmount | number: '1.2-2' }}</td>
+              <td class="num">{{ item.detailCount }}</td>
+              <td>
+                <span class="status"
+                      [class.status-paid]="item.settlementStatus === 'Paid'"
+                      [class.status-pending]="item.settlementStatus === 'Pending'">
+                  <i class="dot"></i>
+                  {{ item.settlementStatus === 'Paid' ? t('settlements.statusPaid') : t('settlements.statusPending') }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <span class="row-actions">
+                  <button type="button" class="act" [title]="t('settlements.manage')" (click)="goView(item)">
+                    {{ item.settlementStatus === 'Paid' ? '👁️' : '📋' }}
+                  </button>
+                  <!-- Una liquidación pagada es registro contable: no se borra. -->
+                  @if (item.settlementStatus === 'Pending') {
+                    <button type="button" class="act act-danger" [title]="t('settlements.delete')"
+                            (click)="deleteSettlement(item)">🗑️</button>
+                  }
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="empty-row">
+              <td colspan="8">
+                <div class="empty-state">
+                  <p class="empty-title">{{ t('settlements.notFound') }}</p>
+                  <p class="empty-hint">
+                    {{ activeFilterCount() > 0 ? t('settlements.emptyHintFiltered') : t('settlements.emptyHint') }}
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <app-pagination
+    [totalItems]="totalRecords()"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
+</div>
+</ng-container>

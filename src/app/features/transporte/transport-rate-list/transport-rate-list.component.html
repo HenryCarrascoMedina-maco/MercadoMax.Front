@@ -1,0 +1,64 @@
+<ng-container *transloco="let t">
+<section class="master-list">
+  <div class="list-header">
+    <h2>{{ t('rates.title') }}</h2>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('rates.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="table-container">
+    @if (loading()) {
+      <p class="loading-text">{{ t('common.loading') }}</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('rates.carrier') }}</th>
+            <th>{{ t('rates.logisticUnit') }}</th>
+            <th>{{ t('common.origin') }}</th>
+            <th>{{ t('common.destination') }}</th>
+            <th>{{ t('rates.unitPrice') }}</th>
+            <th>{{ t('rates.effectiveDate') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of pagedItems(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.carrierName }}</td>
+              <td>{{ item.logisticUnitName }}</td>
+              <td>{{ item.routeOrigin }}</td>
+              <td>{{ item.routeDestination }}</td>
+              <td>{{ item.unitPrice | number: '1.2-2' }}</td>
+              <td>{{ item.effectiveDate | date: 'dd/MM/yyyy' }}</td>
+              <td><span class="badge badge-toggle" [class.badge-active]="item.status" [class.badge-inactive]="!item.status" (click)="toggleStatus(item); $event.stopPropagation()" [title]="item.status ? 'Clic para desactivar' : 'Clic para activar'">{{ item.status ? t('common.active') : t('common.inactive') }}</span></td>
+              <td class="actions">
+                <button class="btn btn-sm btn-view" (click)="goView(item)">{{ t('common.view') }}</button>
+                <button class="btn btn-sm btn-edit" (click)="goEdit(item)">{{ t('common.edit') }}</button>
+                <button class="btn btn-sm btn-delete" (click)="deleteItem(item)">{{ t('common.delete') }}</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="9" class="empty">{{ t('rates.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <app-pagination
+    [totalItems]="items().length"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
+</section>
+</ng-container>

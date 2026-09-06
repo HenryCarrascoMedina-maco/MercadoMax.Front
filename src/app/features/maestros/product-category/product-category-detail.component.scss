@@ -1,0 +1,40 @@
+@use '../master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// Segundo bloque de la tarjeta: separado por una línea, no por otra tarjeta,
+// para que la ficha se lea como un solo documento.
+.related-block {
+  border-top: 1px solid var(--border-color);
+}
+
+.related-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+  }
+
+  .related-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// La tabla anidada ya vive dentro de la tarjeta: sin sombra ni min-width propios.
+.related-block .table-container {
+  box-shadow: none;
+}
+
+.related-block table {
+  min-width: 480px;
+}

@@ -1,0 +1,176 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// Roles y permisos cierran la tarjeta, cada bloque separado por una línea.
+.access-block {
+  border-top: 1px solid var(--border-color);
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.role-checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover { background: var(--bg-surface-hover); }
+  &.active { border-color: var(--primary-color); background: var(--bg-surface-hover); }
+
+  input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    grid-row: 1 / 3;
+    accent-color: var(--primary-color);
+  }
+
+  .role-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .role-desc { font-size: 12px; color: var(--text-muted); }
+}
+
+.permissions-header {
+  cursor: pointer;
+  user-select: none;
+
+  .page-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+
+  .toggle-icon { font-size: 10px; color: var(--text-muted); }
+
+  .perm-count {
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: var(--badge-active-bg);
+    color: var(--badge-active-text);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Leyenda: distingue "lo trae el rol" de "lo puso alguien a mano".
+.perm-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .swatch {
+    width: 22px;
+    height: 14px;
+    border-radius: 7px;
+    flex-shrink: 0;
+  }
+
+  .swatch-role {
+    background: var(--badge-active-bg);
+    border: 1px solid var(--primary-color);
+  }
+
+  .swatch-extra {
+    background: transparent;
+    border: 1px dashed var(--primary-color);
+  }
+
+  .btn-link {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: var(--primary-color);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover { background: var(--bg-surface-hover); }
+    &:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+  }
+}
+
+.permissions-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.perm-module {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.perm-module-name {
+  padding: 9px 12px;
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary-color);
+}
+
+.perm-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.perm-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+  &:hover { background: var(--bg-surface-hover); }
+
+  // Lo concede un rol elegido: relleno sólido.
+  &.active {
+    border-color: var(--primary-color);
+    background: var(--badge-active-bg);
+    color: var(--badge-active-text);
+    font-weight: 600;
+  }
+
+  // Añadido a mano: borde discontinuo, para que se vea que no lo trae el rol y
+  // que por tanto no desaparece al cambiarlo.
+  &.extra {
+    border-style: dashed;
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  input[type="checkbox"] { width: auto; padding: 0; accent-color: var(--primary-color); }
+}

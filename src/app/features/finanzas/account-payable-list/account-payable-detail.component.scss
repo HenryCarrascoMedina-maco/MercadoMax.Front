@@ -1,0 +1,8 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+@use '../../../shared/styles/form-page' as *;
+
+.payments-block,
+.add-payment-block { border-top: 1px solid var(--border-color); }
+.payments-block .table-container { box-shadow: none; }
+.payments-block table { min-width: 620px; }

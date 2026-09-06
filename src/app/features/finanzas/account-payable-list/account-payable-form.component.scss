@@ -1,0 +1,98 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// ── Reparto de la guía ──────────────────────────────────────
+.lines-block { margin-top: 16px; }
+
+.empty-hint {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+  margin: 8px 0 0;
+}
+
+// La tabla puede tener muchas columnas en pantallas estrechas: que se desplace
+// ella y no la página entera.
+.lines-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.lines-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th, td { padding: 10px 12px; text-align: left; }
+
+  th {
+    background: var(--table-header-bg);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  tbody tr { border-top: 1px solid var(--border-color); }
+  tbody tr:hover { background: var(--bg-surface-hover); }
+
+  .num { text-align: right; }
+  .mono { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--text-muted); }
+  .amount { font-weight: 600; }
+
+  // La abreviatura de la unidad acompaña a la cantidad sin competir con ella.
+  .unit {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  .col-price { width: 140px; }
+}
+
+.price-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 9px;
+  text-align: right;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+
+  &:focus { outline: none; border-color: var(--primary-color); }
+  &.ng-invalid.ng-touched { border-color: var(--badge-inactive-text); }
+}
+
+.lines-table tfoot tr {
+  border-top: 2px solid var(--border-color);
+  background: var(--table-header-bg);
+}
+
+.total-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.total-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+@media (max-width: 720px) {
+  .lines-table .col-price { width: 110px; }
+}

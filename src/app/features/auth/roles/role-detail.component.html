@@ -1,0 +1,51 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('rolesPage.title')"
+  [title]="record()?.name || t('common.view')"
+  [crumb]="record()?.name || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  <button pageActions type="button" class="btn btn-primary" (click)="goToEdit()">
+    {{ t('common.edit') }}
+  </button>
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+
+    <div class="page-body permissions-block">
+      <h3 class="page-section-title">{{ t('rolesPage.permissions') }}</h3>
+
+      @if (loadingPermissions()) {
+        <div class="page-loading">{{ t('common.loadingPermissions') }}</div>
+      } @else {
+        <div class="permissions-grid">
+          @for (entry of groupedPermissions(); track entry[0]) {
+            <div class="perm-module-card">
+              <div class="perm-module-header"><strong>{{ entry[0] }}</strong></div>
+              <div class="perm-module-body">
+                @for (perm of entry[1]; track perm.id) {
+                  <div class="perm-row">
+                    <span class="perm-label">{{ perm.action }}</span>
+                    <span class="perm-desc-small">{{ perm.description }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="page-hint">{{ t('rolesPage.noPermissions') }}</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</app-form-page>
+</ng-container>

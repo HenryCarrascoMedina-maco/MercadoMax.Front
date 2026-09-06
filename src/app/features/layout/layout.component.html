@@ -1,0 +1,194 @@
+<ng-container *transloco="let t">
+<div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>{{ sidebarCollapsed() ? 'MM' : 'MercadoMAX' }}</h2>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        {{ sidebarCollapsed() ? '☰' : '✕' }}
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/inicio" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        @if (!sidebarCollapsed()) { <span>{{ t('sidebar.inicio') }}</span> }
+      </a>
+
+      @if (auth.hasRole('Admin')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.administration') }}</span> }
+        </div>
+        <a routerLink="/users" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">👥</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.users') }}</span> }
+        </a>
+        <a routerLink="/roles" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🛡️</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.roles') }}</span> }
+        </a>
+        <a routerLink="/permissions" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🔑</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.permissions') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Masters:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.masters') }}</span> }
+        </div>
+        <a routerLink="/product-categories" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📂</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.categories') }}</span> }
+        </a>
+        <a routerLink="/products" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🥦</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.products') }}</span> }
+        </a>
+        <a routerLink="/product-sizes" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📏</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.productSizes') }}</span> }
+        </a>
+        <a routerLink="/brands" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🏷️</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.brands') }}</span> }
+        </a>
+        <a routerLink="/suppliers" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🚚</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.suppliers') }}</span> }
+        </a>
+        <a routerLink="/logistic-units" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📦</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.logisticUnits') }}</span> }
+        </a>
+        <a routerLink="/pavilions" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🏛️</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.pavilions') }}</span> }
+        </a>
+        <a routerLink="/stalls" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🏪</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.stalls') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Guides:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.guides') }}</span> }
+        </div>
+        <a routerLink="/guides" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📋</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.guidesRemission') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Transport:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.transport') }}</span> }
+        </div>
+        <a routerLink="/carriers" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🚛</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.carriers') }}</span> }
+        </a>
+        <a routerLink="/trucks" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🚍</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.trucks') }}</span> }
+        </a>
+        <a routerLink="/transport-rates" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">💰</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.rates') }}</span> }
+        </a>
+        <a routerLink="/settlements" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📄</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.settlements') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Reception:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.reception') }}</span> }
+        </div>
+        <a routerLink="/receptions" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📥</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.receptions') }}</span> }
+        </a>
+        <a routerLink="/shortages" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">⚠️</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.shortages') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Inventory:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.merchant') }}</span> }
+        </div>
+        <a routerLink="/inventory" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📊</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.inventory') }}</span> }
+        </a>
+        <a routerLink="/reception-confirmations" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">✅</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.receptionConfirmations') }}</span> }
+        </a>
+        <a routerLink="/inventory-movements" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📋</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.inventoryMovements') }}</span> }
+        </a>
+      }
+
+      @if (auth.hasPermission('Finance:List')) {
+        <div class="nav-section">
+          @if (!sidebarCollapsed()) { <span class="nav-section-title">{{ t('sidebar.finance') }}</span> }
+        </div>
+        <a routerLink="/sales" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">💵</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.sales') }}</span> }
+        </a>
+        <a routerLink="/account-payables" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📑</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.accountPayables') }}</span> }
+        </a>
+        <a routerLink="/account-statement" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📊</span>
+          @if (!sidebarCollapsed()) { <span>{{ t('sidebar.accountStatement') }}</span> }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <span class="user-avatar">{{ auth.fullName().charAt(0) }}</span>
+        @if (!sidebarCollapsed()) {
+          <div class="user-details">
+            <span class="user-name">{{ auth.fullName() }}</span>
+            <span class="user-role">{{ auth.roles() | roleName }}</span>
+          </div>
+        }
+      </div>
+      <button class="logout-btn" (click)="logout()" [title]="t('sidebar.logout')">
+        🚪
+      </button>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left"></div>
+    <div class="topbar-right">
+      <!-- Theme toggle -->
+      <button class="topbar-btn" (click)="toggleTheme()" [title]="t('topbar.toggleTheme')">
+        {{ theme.theme() === 'dark' ? '☀️' : '🌙' }}
+      </button>
+      <!-- Language selector -->
+      <select class="lang-select" [value]="currentLang" (change)="changeLang($event)">
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>
+</ng-container>

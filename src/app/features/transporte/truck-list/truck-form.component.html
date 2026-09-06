@@ -1,0 +1,65 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('trucks.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('trucks.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('trucks.licensePlate') }}<span class="req">*</span></label>
+            <input formControlName="licensePlate" [placeholder]="t('trucks.licensePlate')" />
+            @if (errorKey('licensePlate'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('trucks.carrier') }}<span class="req">*</span></label>
+            <select formControlName="carrierId">
+              <option [ngValue]="null" disabled>{{ t('trucks.selectCarrier') }}</option>
+              @for (c of carrierOptions(); track c.id) {
+                <option [ngValue]="c.id">
+                  {{ carrierLabel(c) }}{{ c.status ? '' : ' ' + t('trucks.carrierInactive') }}
+                </option>
+              }
+            </select>
+            @if (carrierOptions().length === 0) {
+              <span class="field-hint">{{ t('trucks.noCarriers') }}</span>
+            }
+            @if (errorKey('carrierId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('trucks.capacityKg') }}<span class="req">*</span></label>
+            <input type="number" min="0.01" step="0.01" formControlName="capacityKg"
+                   [placeholder]="t('trucks.capacity')" />
+            @if (errorKey('capacityKg'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+            <span class="field-hint">{{ t('trucks.capacityHint') }}</span>
+          </div>
+          <div class="form-group">
+            <label>{{ t('trucks.brand') }}</label>
+            <input formControlName="brand" [placeholder]="t('trucks.brand')" />
+          </div>
+          <div class="form-group">
+            <label>{{ t('trucks.model') }}</label>
+            <input formControlName="model" [placeholder]="t('trucks.model')" />
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

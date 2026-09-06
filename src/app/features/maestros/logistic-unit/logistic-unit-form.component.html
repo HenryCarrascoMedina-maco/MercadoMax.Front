@@ -1,0 +1,48 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('logisticUnits.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('logisticUnits.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('common.name') }}<span class="req">*</span></label>
+            <input formControlName="name" [placeholder]="t('logisticUnits.namePlaceholder')" />
+            @if (errorKey('name'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('logisticUnits.abbreviation') }}<span class="req">*</span></label>
+            <input formControlName="abbreviation" [placeholder]="t('logisticUnits.abbreviationPlaceholder')" />
+            @if (errorKey('abbreviation'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('logisticUnits.weightKg') }}</label>
+            <input type="number" min="0.001" step="0.001" formControlName="weightKg"
+                   [placeholder]="t('logisticUnits.weightPlaceholder')" />
+            @if (errorKey('weightKg'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+            <span class="field-hint">{{ t('logisticUnits.weightHint') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

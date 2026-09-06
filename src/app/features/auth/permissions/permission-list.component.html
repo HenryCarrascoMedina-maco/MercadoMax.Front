@@ -1,0 +1,74 @@
+<ng-container *transloco="let t">
+<div class="permission-list-page">
+  <div class="page-header">
+    <h1>{{ t('permissionsPage.title') }}</h1>
+    <button class="btn-primary" (click)="goCreate()">{{ t('permissionsPage.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">{{ t('common.loading') }}</div>
+  } @else {
+    @if (stats(); as s) {
+      <div class="stats-strip">
+        <div class="stat">
+          <span class="stat-n">{{ s.total }}</span>
+          <span class="stat-k">{{ t('permissionsPage.statPermissions') }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-n">{{ s.modules }}</span>
+          <span class="stat-k">{{ t('permissionsPage.statModules') }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-n stat-ok">{{ s.active }}</span>
+          <span class="stat-k">{{ t('permissionsPage.statActive') }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-n" [class.stat-bad]="s.inactive > 0">{{ s.inactive }}</span>
+          <span class="stat-k">{{ t('permissionsPage.statInactive') }}</span>
+        </div>
+      </div>
+    }
+
+    <div class="modules-grid">
+      @for (entry of groupedPermissions(); track entry[0]) {
+        <div class="module-card">
+          <div class="module-header">
+            <h3>{{ entry[0] }}</h3>
+            <span class="count">{{ entry[1].length }} {{ t('permissionsPage.permissionsCount') }}</span>
+          </div>
+          <div class="module-body">
+            @for (perm of entry[1]; track perm.id) {
+              <div class="perm-row" [class.perm-inactive]="perm.status !== 1">
+                <div class="perm-info">
+                  <span class="perm-action">{{ perm.action }}</span>
+                  <span class="perm-desc">{{ perm.description }}</span>
+                </div>
+                <div class="perm-actions">
+                  <span class="badge badge-toggle" [class.badge-active]="perm.status === 1" [class.badge-inactive]="perm.status !== 1"
+                    (click)="togglePermissionStatus(perm)"
+                    [title]="perm.status === 1 ? 'Clic para desactivar' : 'Clic para activar'">
+                    {{ perm.status === 1 ? t('common.active') : t('common.inactive') }}
+                  </span>
+                  <button class="btn-icon" title="Ver" (click)="goView(perm)">👁️</button>
+                  <button class="btn-icon" title="Editar" (click)="goEdit(perm)">✏️</button>
+                  <button class="btn-icon" title="Eliminar" (click)="deletePermission(perm)">🗑️</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="empty">{{ t('permissionsPage.notFound') }}</div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal Crear/Editar Permiso -->
+</ng-container>

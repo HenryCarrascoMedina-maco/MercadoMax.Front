@@ -1,0 +1,52 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('salesPage.title')"
+  [title]="t('salesPage.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <p class="page-hint">{{ t('salesPage.requiredHint') }}</p>
+
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('salesPage.stall') }}<span class="req">*</span></label>
+            <select formControlName="stallId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (s of stalls(); track s.id) {
+                <option [value]="s.id">{{ s.number }}</option>
+              }
+            </select>
+            @if (errorKey('stallId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('salesPage.customer') }}</label>
+            <input type="text" formControlName="customerName" [placeholder]="t('common.optional')" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('salesPage.paymentType') }}<span class="req">*</span></label>
+            <select formControlName="paymentType">
+              <option value="Cash">{{ t('salesPage.paymentCash') }}</option>
+              <option value="Credit">{{ t('salesPage.paymentCredit') }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.processing') : t('salesPage.createAndAdd') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

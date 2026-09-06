@@ -1,0 +1,304 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('guidesPage.title')"
+  [title]="record()?.guideNumber || t('guidesPage.wizardTitleDetails')"
+  [crumb]="isView() ? t('common.view') : t('guidesPage.wizardStep2')"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record(); as h) {
+    @if (!isView()) {
+      <div class="page-body">
+        <div class="wizard-steps">
+          <span class="step step-done">1. {{ t('guidesPage.wizardStep1') }}</span>
+          <span class="step-sep" aria-hidden="true">›</span>
+          <span class="step step-active">2. {{ t('guidesPage.wizardStep2') }}</span>
+        </div>
+      </div>
+    }
+
+    <div class="page-body" [class.header-block]="!isView()">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.guideNumber') }}</span>
+          <span class="detail-value mono">{{ h.guideNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.supplier') }}</span>
+          <span class="detail-value">{{ h.supplierName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.labelCarrier') }}</span>
+          <span class="detail-value" [class.is-empty]="!h.carrierName">{{ h.carrierName || '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.labelTruck') }}</span>
+          <span class="detail-value" [class.is-empty]="!h.truckLicensePlate">{{ h.truckLicensePlate || '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.labelShipmentDate') }}</span>
+          <span class="detail-value mono">{{ h.shipmentDate | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.labelArrivalDate') }}</span>
+          <span class="detail-value mono" [class.is-empty]="!h.estimatedArrivalDate">
+            {{ h.estimatedArrivalDate ? (h.estimatedArrivalDate | date: 'dd/MM/yyyy') : '—' }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('common.status') }}</span>
+          <span class="detail-value">{{ h.guideStatus }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('guidesPage.detailColTransport') }}</span>
+          <span class="detail-value mono">S/ {{ h.totalTransportCost | number: '1.2-2' }}</span>
+        </div>
+        <div class="detail-item span-2">
+          <span class="detail-label">{{ t('common.observations') }}</span>
+          <span class="detail-value" [class.is-empty]="!h.observations">{{ h.observations || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ocupación del camión. Solo tiene sentido si hay camión con capacidad. -->
+    @if (capacityKg(); as cap) {
+      <div class="page-body load-block">
+        <div class="load-head">
+          <h3 class="page-section-title">{{ t('guidesPage.truckLoad') }}</h3>
+          <span class="load-figures" [class.over]="isOverloaded()">
+            {{ loadedKg() | number: '1.0-1' }} / {{ cap | number: '1.0-1' }} kg
+            · {{ loadPercent() }}%
+          </span>
+        </div>
+
+        <div class="load-bar">
+          <div class="load-fill"
+               [class.warn]="loadPercent() >= 85 && !isOverloaded()"
+               [class.over]="isOverloaded()"
+               [style.width.%]="loadPercent() > 100 ? 100 : loadPercent()"></div>
+        </div>
+
+        @if (isOverloaded()) {
+          <p class="load-note over">{{ t('guidesPage.overloaded', { excess: (loadedKg() - cap) | number: '1.0-1' }) }}</p>
+        } @else {
+          <p class="load-note">{{ t('guidesPage.remainingLoad', { kg: remainingKg() | number: '1.0-1' }) }}</p>
+        }
+
+        @if (linesWithoutWeight() > 0) {
+          <p class="load-note warn">{{ t('guidesPage.linesWithoutWeight', { count: linesWithoutWeight() }) }}</p>
+        }
+      </div>
+    } @else if (record()?.truckId) {
+      <div class="page-body load-block">
+        <p class="load-note warn">{{ t('guidesPage.truckWithoutCapacity') }}</p>
+      </div>
+    }
+
+    <div class="page-body lines-block">
+      <div class="lines-head">
+        <h3 class="page-section-title">
+          {{ t('guidesPage.detailsTitle') }}
+          <!-- La guía queda atada a la categoría de su primera línea. -->
+          @if (lockedCategory(); as cat) {
+            <span class="category-lock" [title]="t('guidesPage.categoryLockedHint', { category: cat })">
+              {{ cat }}
+            </span>
+          }
+        </h3>
+        <span class="lines-count">
+          {{ subguides().length }} {{ t('guidesPage.stallsCount') }}
+          · {{ details().length }} {{ t('guidesPage.linesAdded') }}
+        </span>
+      </div>
+
+      @for (sg of subguides(); track sg.stallId) {
+        <section class="subguide">
+          <header class="subguide-head">
+            <div class="subguide-id">
+              <span class="subguide-number">{{ sg.number }}</span>
+              <span class="subguide-stall">{{ sg.stallNumber }} — {{ sg.pavilionName }}</span>
+            </div>
+            <div class="subguide-totals">
+              <span>{{ sg.totalQuantity | number: '1.0-2' }} {{ t('guidesPage.packages') }}</span>
+              @if (sg.totalKg > 0) {
+                <span class="sep" aria-hidden="true">·</span>
+                <span [class.partial]="sg.linesWithoutWeight > 0"
+                      [title]="sg.linesWithoutWeight > 0 ? t('guidesPage.partialWeight') : ''">
+                  {{ sg.totalKg | number: '1.0-1' }} kg{{ sg.linesWithoutWeight > 0 ? '*' : '' }}
+                </span>
+              }
+              <span class="sep" aria-hidden="true">·</span>
+              <span>S/ {{ sg.totalTransport | number: '1.2-2' }}</span>
+            </div>
+          </header>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ t('guidesPage.detailColProduct') }}</th>
+                  <th>{{ t('guidesPage.detailColUnit') }}</th>
+                  <th class="num">{{ t('guidesPage.detailColQty') }}</th>
+                  <th class="num">{{ t('guidesPage.detailColUnitPrice') }}</th>
+                  <th class="num">{{ t('guidesPage.detailColTransport') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of sg.lines; track d.id) {
+                  <tr>
+                    <td>
+                      {{ d.productName }}
+                      @if (d.brandName || d.productSizeName) {
+                        <span class="muted">
+                          ({{ d.brandName || '—' }}{{ d.productSizeName ? ' / ' + d.productSizeName : '' }})
+                        </span>
+                      }
+                    </td>
+                    <td>{{ d.logisticUnitName }}</td>
+                    <td class="num">{{ d.quantity }}</td>
+                    <td class="num" [class.muted]="!d.unitPrice">
+                      {{ d.unitPrice ? 'S/ ' + (d.unitPrice | number: '1.2-2') : '—' }}
+                    </td>
+                    <td class="num">S/ {{ d.transportSubtotal | number: '1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      } @empty {
+        <p class="empty-lines">{{ t('guidesPage.detailEmptyMsg') }}</p>
+      }
+
+      @if (details().length) {
+        <div class="lines-total">
+          <span>{{ t('guidesPage.detailColTransport') }}</span>
+          <strong>S/ {{ transportTotal() | number: '1.2-2' }}</strong>
+        </div>
+      }
+    </div>
+
+    @if (!isView()) {
+      <div class="page-body add-line-block">
+        @if (showAddDetailForm()) {
+          <form [formGroup]="detailForm" (ngSubmit)="saveDetail()">
+            <h3 class="page-section-title">{{ t('guidesPage.newDetailTitle') }}</h3>
+
+            @if (lockedCategory(); as cat) {
+              <p class="page-hint">{{ t('guidesPage.categoryLockedHint', { category: cat }) }}</p>
+            }
+
+            <div class="page-grid">
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelDestStall') }}<span class="req">*</span></label>
+                <select formControlName="destinationStallId">
+                  <option [ngValue]="null">{{ t('guidesPage.selectStall') }}</option>
+                  @for (st of stalls(); track st.id) {
+                    <option [value]="st.id">{{ st.number }} — {{ st.pavilionName }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelProduct') }}<span class="req">*</span></label>
+                <select formControlName="productId" (change)="onProductChange($event)">
+                  <option [ngValue]="null">{{ t('guidesPage.selectProduct') }}</option>
+                  @for (p of availableProducts(); track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+                @if (lockedCategory() && !availableProducts().length) {
+                  <span class="field-hint">{{ t('guidesPage.noProductsInCategory') }}</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelBrand') }}</label>
+                <select formControlName="brandId">
+                  <option [ngValue]="null">{{ t('guidesPage.selectNoneF') }}</option>
+                  @for (b of brands(); track b.id) {
+                    <option [value]="b.id">{{ b.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelSize') }}</label>
+                <select formControlName="productSizeId">
+                  <option [ngValue]="null">{{ t('guidesPage.selectNoneF') }}</option>
+                  @for (sz of productSizes(); track sz.id) {
+                    <option [value]="sz.id">{{ sz.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelLogisticUnit') }}<span class="req">*</span></label>
+                <select formControlName="logisticUnitId" (change)="onLogisticUnitChange($event)">
+                  <option [ngValue]="null">{{ t('guidesPage.selectUnit') }}</option>
+                  @for (lu of logisticUnits(); track lu.id) {
+                    <option [value]="lu.id">{{ lu.name }} ({{ lu.abbreviation }})</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelQty') }}<span class="req">*</span></label>
+                <input type="number" formControlName="quantity" min="1" />
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelUnitPrice') }}<span class="req">*</span></label>
+                <input type="number" formControlName="unitPrice" min="0" step="0.01" />
+              </div>
+
+              <div class="form-group">
+                <label>{{ t('guidesPage.labelTransportPrice') }}<span class="req">*</span></label>
+                <input type="number" formControlName="transportUnitPrice" min="0" step="0.01" />
+              </div>
+
+              <div class="form-group span-2">
+                <label>{{ t('common.observations') }}</label>
+                <input type="text" formControlName="observations" [placeholder]="t('common.optional')" />
+              </div>
+            </div>
+
+            <div class="line-actions">
+              @if (wouldExceedCapacity()) {
+                <span class="line-warning">{{ t('guidesPage.lineExceedsCapacity') }}</span>
+              }
+              <button type="button" class="btn btn-secondary" (click)="toggleAddDetailForm()">
+                {{ t('common.cancel') }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="addingDetail()">
+                {{ addingDetail() ? t('guidesPage.savingText') : t('guidesPage.btnAddLine') }}
+              </button>
+            </div>
+          </form>
+        } @else {
+          <button type="button" class="btn btn-secondary" (click)="toggleAddDetailForm()">
+            {{ t('guidesPage.btnAddLineToggle') }}
+          </button>
+        }
+      </div>
+
+      <div class="page-footer">
+        @if (isOverloaded()) {
+          <span class="footer-note over">{{ t('guidesPage.cannotFinishOverloaded') }}</span>
+        } @else if (!canFinish()) {
+          <span class="footer-note">{{ t('guidesPage.needLinesToFinish') }}</span>
+        }
+        <button type="button" class="btn btn-primary" [disabled]="!canFinish()" (click)="finish()">
+          {{ t('guidesPage.btnFinish') }}
+        </button>
+      </div>
+    }
+  }
+</app-form-page>
+</ng-container>

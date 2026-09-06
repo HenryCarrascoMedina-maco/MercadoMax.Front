@@ -1,0 +1,121 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('accountPayables.title')"
+  [title]="t('accountPayables.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <p class="page-hint">{{ t('accountPayables.requiredHint') }}</p>
+
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('accountPayables.stall') }}<span class="req">*</span></label>
+            <select formControlName="stallId" (change)="onStallChange()">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (s of stalls(); track s.id) {
+                <option [value]="s.id">{{ s.number }}</option>
+              }
+            </select>
+            @if (errorKey('stallId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('accountPayables.supplier') }}<span class="req">*</span></label>
+            <select formControlName="supplierId" (change)="onSupplierChange($any($event.target).value)">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (s of suppliers(); track s.id) {
+                <option [value]="s.id">{{ s.businessName }}</option>
+              }
+            </select>
+            @if (errorKey('supplierId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group span-2">
+            <label>{{ t('accountPayables.guide') }}<span class="req">*</span></label>
+            <select formControlName="guideId" [disabled]="!supplierGuides().length" (change)="onGuideChange()">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (g of supplierGuides(); track g.id) {
+                <option [value]="g.id">{{ g.guideNumber }}</option>
+              }
+            </select>
+            @if (errorKey('guideId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('accountPayables.dueDate') }}</label>
+            <input type="date" formControlName="dueDate" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Reparto de la guía a este puesto ──────────────── -->
+      <div class="page-body lines-block">
+        <h3 class="page-section-title">{{ t('accountPayables.linesTitle') }}</h3>
+
+        @if (loadingLines()) {
+          <p class="page-loading">{{ t('common.loading') }}</p>
+        } @else if (noLines()) {
+          <p class="empty-hint">{{ t('accountPayables.noLines') }}</p>
+        } @else if (!lines().length) {
+          <p class="empty-hint">{{ t('accountPayables.pickStallAndGuide') }}</p>
+        } @else {
+          <div class="lines-scroll">
+            <table class="lines-table" formArrayName="prices">
+              <thead>
+                <tr>
+                  <th>{{ t('accountPayables.product') }}</th>
+                  <th>{{ t('accountPayables.brand') }}</th>
+                  <th>{{ t('accountPayables.size') }}</th>
+                  <th class="num">{{ t('accountPayables.quantity') }}</th>
+                  <th class="num col-price">{{ t('accountPayables.unitPrice') }}<span class="req">*</span></th>
+                  <th class="num">{{ t('accountPayables.subtotal') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of lines(); track line.guideDetailId; let i = $index) {
+                  <tr>
+                    <td>{{ line.productName }}</td>
+                    <td [class.muted]="!line.brandName">{{ line.brandName || '—' }}</td>
+                    <td [class.muted]="!line.productSizeName">{{ line.productSizeName || '—' }}</td>
+                    <td class="num mono">
+                      {{ line.quantity }}
+                      <span class="unit">{{ line.logisticUnitAbbr || line.logisticUnitName }}</span>
+                    </td>
+                    <td class="num col-price">
+                      <input type="number" min="0" step="0.01" class="price-input"
+                             [formControlName]="i" (input)="syncPrices()"
+                             [attr.aria-label]="t('accountPayables.unitPriceFor', { product: line.productName })" />
+                    </td>
+                    <td class="num mono amount">S/ {{ subtotals()[i].toFixed(2) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="num total-label">{{ t('accountPayables.totalAmount') }}</td>
+                  <td class="num mono amount total-value">S/ {{ total().toFixed(2) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <p class="page-hint">{{ t('accountPayables.totalHint') }}</p>
+        }
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving() || !lines().length">
+          {{ saving() ? t('common.processing') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

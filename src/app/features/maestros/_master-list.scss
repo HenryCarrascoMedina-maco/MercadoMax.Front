@@ -1,0 +1,251 @@
+// ── Shared styles for all master list components ────────
+.master-list-page {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 22px;
+    color: var(--primary-color);
+    margin: 0;
+  }
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.alert-success { background: var(--alert-success-bg); color: var(--badge-active-text); border-left: 4px solid var(--badge-active-text); }
+.alert-error { background: var(--alert-error-bg); color: var(--badge-inactive-text); border-left: 4px solid var(--badge-inactive-text); }
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-input, .filter-select {
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+}
+.search-input { width: 100%; max-width: 360px; }
+.filter-select { min-width: 180px; }
+
+.table-container {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;   // por debajo de esto, scroll horizontal
+  border-collapse: collapse;
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  th {
+    background: var(--table-header-bg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  tr:not(:last-child) td {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  tbody tr:hover {
+    background: var(--bg-surface-hover);
+  }
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-active { background: var(--badge-active-bg); color: var(--badge-active-text); }
+.badge-inactive { background: var(--badge-inactive-bg); color: var(--badge-inactive-text); }
+.badge-toggle { cursor: pointer; transition: opacity 0.2s; &:hover { opacity: 0.8; } }
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px !important;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+// Buttons
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-primary {
+  background: var(--primary-color);
+  color: var(--on-primary);
+  &:hover { filter: brightness(0.92); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
+}
+.btn-secondary {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  &:hover { background: var(--border-color); }
+}
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  &:hover { background: var(--bg-surface-hover); }
+}
+
+// Modal
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--modal-bg);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--primary-color);
+  }
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  .form-group { flex: 1; }
+}
+
+.form-group {
+  margin-bottom: 16px;
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text-primary);
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+// ── Densidad adaptativa ───────────────────────────────────
+// La tabla ocupa siempre el 100%; al reducirse el espacio se aprieta
+// primero y solo hace scroll horizontal al llegar a su min-width.
+@media (max-width: 1280px) {
+  table th, table td { padding: 11px 12px; }
+}
+
+@media (max-width: 1024px) {
+  table th, table td { padding: 10px 10px; font-size: 13px; }
+  table th { font-size: 11px; }
+}
+
+@media (max-width: 720px) {
+  .page-header h1 { font-size: 19px; }
+  .search-input, .filter-select { max-width: 100%; width: 100%; }
+}

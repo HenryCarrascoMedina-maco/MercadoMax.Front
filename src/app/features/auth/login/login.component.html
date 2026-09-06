@@ -1,0 +1,63 @@
+<ng-container *transloco="let t">
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>MercadoMAX</h1>
+      <p>{{ t('auth.loginTitle') }}</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      @if (error()) {
+        <div class="alert alert-error">{{ error() }}</div>
+      }
+
+      <div class="form-group">
+        <label for="email">{{ t('common.email') }}</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="usuario@ejemplo.com"
+          autocomplete="email"
+        />
+        @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+          <span class="field-error">{{ t('auth.emailRequired') }}</span>
+        }
+        @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+          <span class="field-error">{{ t('auth.emailInvalid') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">{{ t('common.password') }}</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+        @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+          <span class="field-error">{{ t('auth.passwordRequired') }}</span>
+        }
+      </div>
+
+      <button type="submit" [disabled]="form.invalid || loading()" class="btn-login">
+        @if (loading()) {
+          <span class="spinner"></span> {{ t('auth.logging') }}
+        } @else {
+          {{ t('auth.login') }}
+        }
+      </button>
+
+      <div class="forgot-password-link">
+        <a routerLink="/forgot-password">{{ t('auth.forgotPassword') }}</a>
+      </div>
+
+      <div class="register-link">
+        <a routerLink="/register">{{ t('auth.noAccount') }}</a>
+      </div>
+    </form>
+  </div>
+</div>
+</ng-container>

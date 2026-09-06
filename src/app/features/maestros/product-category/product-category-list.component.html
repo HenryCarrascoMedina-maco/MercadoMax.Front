@@ -1,0 +1,39 @@
+<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <h1>{{ t('categories.title') }}</h1>
+    <button class="btn btn-primary" *hasPermission="'Masters:Create'" (click)="goCreate()">
+      {{ t('categories.new') }}
+    </button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="search-input"
+      [placeholder]="t('categories.searchPlaceholder')"
+      [value]="search()"
+      (input)="onSearch($any($event.target).value)" />
+  </div>
+
+  <app-data-table
+    [columns]="columns"
+    [data]="rows()"
+    [loading]="loading()"
+    [rowActions]="rowActions"
+    [emptyLabel]="'categories.notFound'"
+    (action)="onAction($event)" />
+</div>
+
+<app-confirm-dialog
+  [open]="confirmOpen()"
+  [message]="confirmMessage()"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()" />
+</ng-container>

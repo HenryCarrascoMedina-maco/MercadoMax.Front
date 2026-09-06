@@ -1,0 +1,108 @@
+// Base heredada (tarjeta, tabla, botones, modal) + sistema de listados del ERP.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+.statement-page { max-width: 1440px; }
+
+// El puesto pesa el doble: es el filtro que define todo el reporte.
+.filter-grid {
+  align-items: end;
+
+  .field-stall { grid-column: span 2; }
+
+  // El botón se alinea con los campos, no con sus etiquetas.
+  .field-action {
+    justify-content: flex-end;
+    > .btn { height: 38px; padding: 0 18px; }
+  }
+}
+
+// ── Resumen del puesto ────────────────────────────────────
+.summary-panel {
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+
+  h3 { margin: 0; }
+
+  .summary-who {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+}
+
+.money-count strong { color: var(--primary-color); }
+
+// El saldo del pie va en rojo igual que en Cuentas por Pagar: es deuda abierta.
+table tfoot td.amount { color: var(--badge-inactive-text); }
+
+.progress-wrap {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+
+    span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+    strong {
+      font-size: 15px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+  }
+}
+
+// ── Esqueleto del resumen ─────────────────────────────────
+// Reserva el alto de las cuatro cifras mientras carga el reporte.
+.summary-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px 24px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+
+  .sk-card { display: flex; flex-direction: column; gap: 9px; }
+
+  .bar {
+    display: block;
+    height: 10px;
+    width: 60%;
+    border-radius: 6px;
+    background: var(--bg-surface-hover);
+    animation: erp-skeleton-pulse 1.4s ease-in-out infinite;
+
+    &.bar-lg { height: 20px; width: 85%; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary-skeleton .bar { animation: none; }
+}
+
+@media (max-width: 720px) {
+  .filter-grid .field-stall { grid-column: span 1; }
+}

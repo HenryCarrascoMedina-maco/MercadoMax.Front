@@ -1,0 +1,46 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+.lines-block,
+.add-line-block {
+  border-top: 1px solid var(--border-color);
+}
+
+.lines-block .table-container { box-shadow: none; }
+.lines-block table { min-width: 640px; }
+.lines-block th.num,
+.lines-block td.num { text-align: right; }
+.lines-block td.num { font-variant-numeric: tabular-nums; }
+
+// Alta rápida de línea: una fila de campos que se envuelve si falta ancho.
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 0;
+    flex: 1 1 140px;
+    min-width: 0;
+
+    &.grow-2 { flex: 2 1 200px; }
+    &.narrow { flex: 0 0 120px; }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    select, input { height: 40px; }
+  }
+
+  > .btn { height: 40px; white-space: nowrap; }
+}

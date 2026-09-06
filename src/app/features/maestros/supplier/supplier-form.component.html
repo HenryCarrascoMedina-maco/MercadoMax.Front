@@ -1,0 +1,64 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('suppliers.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('suppliers.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('suppliers.businessName') }}<span class="req">*</span></label>
+            <input formControlName="businessName" />
+            @if (errorKey('businessName'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('suppliers.taxId') }}<span class="req">*</span></label>
+            <input formControlName="taxId" />
+            @if (errorKey('taxId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('common.phone') }}</label>
+            <input formControlName="phone" />
+          </div>
+          <div class="form-group">
+            <label>{{ t('suppliers.contactName') }}</label>
+            <input formControlName="contactName" />
+          </div>
+          <div class="form-group">
+            <label>{{ t('suppliers.contactPhone') }}</label>
+            <input formControlName="contactPhone" />
+          </div>
+          <div class="form-group">
+            <label>{{ t('suppliers.province') }}</label>
+            <input formControlName="province" />
+          </div>
+          <div class="form-group">
+            <label>{{ t('suppliers.department') }}</label>
+            <input formControlName="department" />
+          </div>
+          <div class="form-group span-2">
+            <label>{{ t('suppliers.address') }}</label>
+            <input formControlName="address" />
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

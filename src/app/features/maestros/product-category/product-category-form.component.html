@@ -1,0 +1,25 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('categories.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('categories.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else {
+    <app-dynamic-form
+      [fields]="formFields"
+      [value]="formValue()"
+      [mode]="isEdit() ? 'edit' : 'create'"
+      (formSubmit)="onSubmit($event)"
+      (formCancel)="cancel()" />
+  }
+</app-form-page>
+</ng-container>

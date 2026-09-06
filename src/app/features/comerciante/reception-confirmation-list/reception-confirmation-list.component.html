@@ -1,0 +1,130 @@
+<ng-container *transloco="let t">
+<div class="master-list-page confirmations-page">
+
+  <!-- ── Encabezado ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>{{ t('receptionConfirmations.title') }}</h1>
+      @if (selectedStallId()) {
+        <span class="record-count">{{ items().length }} {{ t('receptionConfirmations.records') }}</span>
+      }
+    </div>
+    <button *hasPermission="'Inventory:Update'" class="btn btn-primary btn-icon-left" (click)="goCreate()">
+      <app-icon name="plus" [size]="16" />
+      {{ t('receptionConfirmations.new') }}
+    </button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      <app-icon [name]="msg.type === 'success' ? 'check' : 'alert'" [size]="16" />
+      <span>{{ msg.text }}</span>
+    </div>
+  }
+
+  <!-- ── Panel de filtros ───────────────────────────────── -->
+  <section class="filter-card">
+    <div class="filter-card-head">
+      <span class="filter-card-title">{{ t('receptionConfirmations.filters') }}</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-chip">{{ t('receptionConfirmations.activeFilters', { count: activeFilterCount() }) }}</span>
+      }
+      <button type="button" class="btn-link" [disabled]="activeFilterCount() === 0" (click)="clearFilters()">
+        <app-icon name="reset" [size]="14" />
+        {{ t('receptionConfirmations.clearFilters') }}
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="field field-stall">
+        <label>{{ t('receptionConfirmations.stallFilter') }}</label>
+        <select [value]="selectedStallId() ?? ''" (change)="onStallChange($any($event.target).value)">
+          <option value="">{{ t('common.select') }}</option>
+          @for (s of stalls(); track s.id) {
+            <option [value]="s.id">{{ s.number }} — {{ s.pavilionName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('receptionConfirmations.dateFrom') }}</label>
+        <input type="date" [value]="filterDateFrom()"
+               (change)="filterDateFrom.set($any($event.target).value); applyFilters()" />
+      </div>
+
+      <div class="field">
+        <label>{{ t('receptionConfirmations.dateTo') }}</label>
+        <input type="date" [value]="filterDateTo()"
+               (change)="filterDateTo.set($any($event.target).value); applyFilters()" />
+      </div>
+    </div>
+  </section>
+
+  @if (!selectedStallId()) {
+    <div class="table-container">
+      <div class="empty-state">
+        <app-icon name="check" [size]="40" [strokeWidth]="1.5" />
+        <p class="empty-title">{{ t('receptionConfirmations.noSelectionTitle') }}</p>
+        <p class="empty-hint">{{ t('receptionConfirmations.selectStall') }}</p>
+      </div>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('receptionConfirmations.receptionId') }}</th>
+            <th>{{ t('receptionConfirmations.stall') }}</th>
+            <th>{{ t('receptionConfirmations.confirmationDate') }}</th>
+            <th class="col-grow">{{ t('common.observations') }}</th>
+          </tr>
+        </thead>
+
+        @if (loading()) {
+          <tbody class="skeleton">
+            @for (r of skeletonRows; track $index) {
+              <tr>@for (c of [1,2,3,4,5]; track $index) { <td><span class="bar"></span></td> }</tr>
+            }
+          </tbody>
+        } @else {
+          <tbody>
+            @for (item of pagedItems(); track item.id) {
+              <tr>
+                <td class="mono">#{{ item.id }}</td>
+                <td class="mono">#{{ item.receptionId }}</td>
+                <td>{{ item.stallCode }}</td>
+                <td class="nowrap">{{ item.confirmationDate | date:'dd/MM/yyyy' }}</td>
+                <td class="col-grow" [class.muted]="!item.observations">{{ item.observations || '—' }}</td>
+              </tr>
+            } @empty {
+              <tr class="empty-row">
+                <td colspan="5">
+                  <div class="empty-state">
+                    <app-icon name="check" [size]="40" [strokeWidth]="1.5" />
+                    <p class="empty-title">{{ t('receptionConfirmations.emptyTitle') }}</p>
+                    <p class="empty-hint">{{ t('receptionConfirmations.emptyHint') }}</p>
+                    <button *hasPermission="'Inventory:Update'" class="btn btn-primary btn-icon-left" (click)="goCreate()">
+                      <app-icon name="plus" [size]="16" />
+                      {{ t('receptionConfirmations.new') }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        }
+      </table>
+    </div>
+
+    <app-pagination
+      [totalItems]="items().length"
+      [currentPage]="currentPage()"
+      [pageSize]="pageSize()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)" />
+  }
+</div>
+
+<!-- ── Modal: nueva confirmación ────────────────────────── -->
+</ng-container>

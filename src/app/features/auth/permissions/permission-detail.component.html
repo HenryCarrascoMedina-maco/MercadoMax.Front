@@ -1,0 +1,25 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('permissionsPage.title')"
+  [title]="fullKey() || t('common.view')"
+  [crumb]="fullKey()"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  <button pageActions type="button" class="btn btn-primary" (click)="goToEdit()">
+    {{ t('common.edit') }}
+  </button>
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+  }
+</app-form-page>
+</ng-container>

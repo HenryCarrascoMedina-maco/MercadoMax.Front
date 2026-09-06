@@ -1,0 +1,38 @@
+@use '../../maestros/master-list' as *;
+
+.toolbar {
+  align-items: center;
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--primary-color);
+  }
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+tbody tr.low-stock {
+  background: var(--row-warning-bg);
+
+  td {
+    color: var(--row-warning-text);
+    font-weight: 500;
+  }
+
+  &:hover {
+    background: var(--row-warning-bg);
+  }
+}

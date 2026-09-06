@@ -1,0 +1,8 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+@use '../../../shared/styles/form-page' as *;
+
+.lines-block,
+.add-line-block { border-top: 1px solid var(--border-color); }
+.lines-block .table-container { box-shadow: none; }
+.lines-block table { min-width: 700px; }

@@ -1,0 +1,81 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('guidesPage.title')"
+  [title]="t('guidesPage.wizardTitleNew')"
+  [crumb]="t('guidesPage.wizardStep1')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <!-- Dos pasos, dos rutas: el indicador dice en cuál estás. -->
+        <div class="wizard-steps">
+          <span class="step step-active">1. {{ t('guidesPage.wizardStep1') }}</span>
+          <span class="step-sep" aria-hidden="true">›</span>
+          <span class="step">2. {{ t('guidesPage.wizardStep2') }}</span>
+        </div>
+
+        <div class="page-grid">
+          <div class="form-group span-2">
+            <label>{{ t('guidesPage.supplier') }}<span class="req">*</span></label>
+            <select formControlName="supplierId">
+              <option [ngValue]="null">{{ t('guidesPage.selectSupplier') }}</option>
+              @for (s of suppliers(); track s.id) {
+                <option [value]="s.id">{{ s.businessName }}</option>
+              }
+            </select>
+            @if (errorKey('supplierId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('guidesPage.labelCarrier') }}</label>
+            <select formControlName="carrierId" (change)="onCarrierChange($event)">
+              <option [ngValue]="null">{{ t('guidesPage.selectNone') }}</option>
+              @for (c of carriers(); track c.id) {
+                <option [value]="c.id">{{ c.firstName }} {{ c.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('guidesPage.labelTruck') }}</label>
+            <select formControlName="truckId" [disabled]="!trucks().length">
+              <option [ngValue]="null">{{ t('guidesPage.selectNone') }}</option>
+              @for (tk of trucks(); track tk.id) {
+                <option [value]="tk.id">{{ tk.licensePlate }}{{ tk.brand ? ' (' + tk.brand + ')' : '' }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('guidesPage.labelShipmentDate') }}<span class="req">*</span></label>
+            <input type="date" formControlName="shipmentDate" />
+            @if (errorKey('shipmentDate'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('guidesPage.labelArrivalDate') }}</label>
+            <input type="date" formControlName="estimatedArrivalDate" />
+          </div>
+
+          <div class="form-group span-2">
+            <label>{{ t('common.observations') }}</label>
+            <textarea formControlName="observations" [placeholder]="t('common.optional')"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('guidesPage.savingText') : t('guidesPage.btnNext') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

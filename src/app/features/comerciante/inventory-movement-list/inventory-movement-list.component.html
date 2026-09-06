@@ -1,0 +1,189 @@
+<ng-container *transloco="let t">
+<div class="master-list-page kardex-page">
+
+  <!-- ── Encabezado ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>{{ t('inventoryMovements.title') }}</h1>
+      @if (selectedInventoryId()) {
+        <span class="record-count">{{ totalItems() }} {{ t('inventoryMovements.records') }}</span>
+      }
+    </div>
+    <button *hasPermission="'Inventory:Update'" class="btn btn-primary btn-icon-left"
+            (click)="goCreate()" [disabled]="!selectedInventoryId()">
+      <app-icon name="plus" [size]="16" />
+      {{ t('inventoryMovements.new') }}
+    </button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      <app-icon [name]="msg.type === 'success' ? 'check' : 'alert'" [size]="16" />
+      <span>{{ msg.text }}</span>
+    </div>
+  }
+
+  <!-- ── Panel de filtros ───────────────────────────────── -->
+  <section class="filter-card">
+    <div class="filter-card-head">
+      <span class="filter-card-title">{{ t('inventoryMovements.filters') }}</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-chip">{{ t('inventoryMovements.activeFilters', { count: activeFilterCount() }) }}</span>
+      }
+      <button type="button" class="btn-link" [disabled]="activeFilterCount() === 0" (click)="clearFilters()">
+        <app-icon name="reset" [size]="14" />
+        {{ t('inventoryMovements.clearFilters') }}
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="field field-inventory">
+        <label>{{ t('inventoryMovements.inventoryFilter') }}</label>
+        <select [value]="selectedInventoryId() ?? ''" (change)="onInventoryChange($any($event.target).value)">
+          <option value="">{{ t('common.select') }}</option>
+          @for (inv of inventoryList(); track inv.id) {
+            <option [value]="inv.id">{{ inv.productName }} — {{ inv.stallCode }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('inventoryMovements.dateFrom') }}</label>
+        <input type="date" [value]="filterDateFrom()"
+               (change)="filterDateFrom.set($any($event.target).value); applyFilters()" />
+      </div>
+
+      <div class="field">
+        <label>{{ t('inventoryMovements.dateTo') }}</label>
+        <input type="date" [value]="filterDateTo()"
+               (change)="filterDateTo.set($any($event.target).value); applyFilters()" />
+      </div>
+    </div>
+  </section>
+
+  @if (!selectedInventoryId()) {
+    <div class="table-container">
+      <div class="empty-state">
+        <app-icon name="receipt" [size]="40" [strokeWidth]="1.5" />
+        <p class="empty-title">{{ t('inventoryMovements.noSelectionTitle') }}</p>
+        <p class="empty-hint">{{ t('inventoryMovements.selectInventory') }}</p>
+      </div>
+    </div>
+  } @else {
+
+    <!-- ── Contexto del inventario ──────────────────────── -->
+    @if (selectedInventory(); as inv) {
+      <section class="money-panel">
+        <div class="money-grid">
+          <div class="money">
+            <span>{{ t('inventoryMovements.product') }}</span>
+            <strong class="money-text">{{ inv.productName }}</strong>
+          </div>
+          <div class="money">
+            <span>{{ t('receptionConfirmations.stall') }}</span>
+            <strong class="money-text">{{ inv.stallCode }}</strong>
+          </div>
+          <div class="money">
+            <span>{{ t('inventoryMovements.unit') }}</span>
+            <strong class="money-text">{{ inv.logisticUnitName }}</strong>
+          </div>
+          <div class="money">
+            <span>{{ t('inventoryMovements.currentStock') }}</span>
+            <strong [class.stock-low]="inv.currentStock <= inv.minimumStock">
+              {{ inv.currentStock | number:'1.2-2' }}
+            </strong>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ── Movimientos ──────────────────────────────────── -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('inventoryMovements.movementType') }}</th>
+            <th class="num">{{ t('inventoryMovements.quantity') }}</th>
+            <th>{{ t('inventoryMovements.referenceType') }}</th>
+            <th>{{ t('inventoryMovements.referenceId') }}</th>
+            <th class="col-grow">{{ t('common.observations') }}</th>
+            <th>{{ t('inventoryMovements.movementDate') }}</th>
+            <th>{{ t('inventoryMovements.user') }}</th>
+          </tr>
+        </thead>
+
+        @if (loading()) {
+          <tbody class="skeleton">
+            @for (r of skeletonRows; track $index) {
+              <tr>@for (c of [1,2,3,4,5,6,7,8]; track $index) { <td><span class="bar"></span></td> }</tr>
+            }
+          </tbody>
+        } @else {
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr>
+                <td class="mono">#{{ item.id }}</td>
+                <td>
+                  <span class="tag" [class.tag-good]="item.movementType === 'Inbound'"
+                        [class.tag-info]="item.movementType === 'Outbound'"
+                        [class.tag-neutral]="item.movementType === 'Adjustment'">
+                    {{ t('inventoryMovements.type_' + item.movementType) }}
+                  </span>
+                </td>
+                <!-- El signo dice si el movimiento sube o baja el stock. -->
+                <td class="num qty"
+                    [class.qty-in]="item.movementType === 'Inbound'"
+                    [class.qty-out]="item.movementType === 'Outbound'"
+                    [class.qty-adj]="item.movementType === 'Adjustment'">
+                  {{ signedQuantity(item) > 0 ? '+' : '' }}{{ signedQuantity(item) | number:'1.2-2' }}
+                </td>
+                <td [class.muted]="!item.referenceType">{{ item.referenceType || '—' }}</td>
+                <td class="mono" [class.muted]="!item.referenceId">{{ item.referenceId || '—' }}</td>
+                <td class="col-grow" [class.muted]="!item.observations">{{ item.observations || '—' }}</td>
+                <td class="nowrap">{{ item.movementDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ item.userName }}</td>
+              </tr>
+            } @empty {
+              <tr class="empty-row">
+                <td colspan="8">
+                  <div class="empty-state">
+                    <app-icon name="receipt" [size]="40" [strokeWidth]="1.5" />
+                    <p class="empty-title">{{ t('inventoryMovements.emptyTitle') }}</p>
+                    <p class="empty-hint">{{ t('inventoryMovements.emptyHint') }}</p>
+                    <button *hasPermission="'Inventory:Update'" class="btn btn-primary btn-icon-left" (click)="goCreate()">
+                      <app-icon name="plus" [size]="16" />
+                      {{ t('inventoryMovements.new') }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          @if (items().length) {
+            <tfoot>
+              <tr>
+                <td colspan="2">{{ t('inventoryMovements.pageNet') }}</td>
+                <td class="num qty" [class.qty-in]="pageNet() > 0" [class.qty-out]="pageNet() < 0">
+                  {{ pageNet() > 0 ? '+' : '' }}{{ pageNet() | number:'1.2-2' }}
+                </td>
+                <td colspan="5"></td>
+              </tr>
+            </tfoot>
+          }
+        }
+      </table>
+    </div>
+
+    <app-pagination
+      [totalItems]="totalItems()"
+      [currentPage]="currentPage()"
+      [pageSize]="pageSize()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)" />
+  }
+</div>
+
+<!-- ── Modal: registrar movimiento ──────────────────────── -->
+</ng-container>

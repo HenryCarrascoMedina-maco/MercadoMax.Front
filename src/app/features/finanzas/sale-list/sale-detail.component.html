@@ -1,0 +1,180 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('salesPage.title')"
+  [title]="isView() ? t('salesPage.viewTitle') : t('salesPage.manageSale')"
+  [crumb]="isView() ? t('common.view') : t('salesPage.manageSale')"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  @if (!isView() && isCompleted()) {
+    <button pageActions *hasPermission="'Finance:Update'" type="button"
+            class="btn btn-danger btn-icon-left" (click)="askVoid()">
+      <app-icon name="ban" [size]="15" />
+      {{ t('salesPage.void') }}
+    </button>
+  }
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record(); as h) {
+    <div class="page-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ t('salesPage.stall') }}</span>
+          <span class="detail-value">{{ h.stallNumber }} — {{ h.pavilionName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('salesPage.customer') }}</span>
+          <span class="detail-value" [class.is-empty]="!h.customerName">{{ h.customerName || '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('salesPage.saleDate') }}</span>
+          <span class="detail-value mono">{{ h.saleDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('salesPage.seller') }}</span>
+          <span class="detail-value" [class.is-empty]="!h.userName">{{ h.userName || '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('salesPage.paymentType') }}</span>
+          <span class="tag"
+                [class.tag-good]="h.paymentType === 'Cash'"
+                [class.tag-warn]="h.paymentType === 'Credit'">
+            {{ h.paymentType === 'Cash' ? t('salesPage.paymentCash') : t('salesPage.paymentCredit') }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('common.status') }}</span>
+          <span class="status" [class.status-ok]="isCompleted()" [class.status-void]="isVoided()">
+            <i class="dot"></i>
+            {{ isCompleted() ? t('salesPage.statusCompleted') : t('salesPage.statusVoided') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="total-banner">
+        <span>{{ t('salesPage.total') }}</span>
+        <strong>S/ {{ h.totalAmount | number: '1.2-2' }}</strong>
+      </div>
+
+      @if (!isView() && isVoided()) {
+        <div class="alert alert-error">
+          <app-icon name="ban" [size]="16" />
+          <span>{{ t('salesPage.voidedHint') }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="page-body lines-block">
+      <h3 class="page-section-title">{{ t('salesPage.detailsTitle') }}</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('salesPage.product') }}</th>
+              <th>{{ t('salesPage.brand') }}</th>
+              <th>{{ t('salesPage.logisticUnit') }}</th>
+              <th class="num">{{ t('salesPage.quantity') }}</th>
+              <th class="num">{{ t('salesPage.unitPrice') }}</th>
+              <th class="num">{{ t('salesPage.subtotal') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of details(); track d.id) {
+              <tr>
+                <td>{{ d.productName }}</td>
+                <td [class.muted]="!d.brandName">
+                  {{ d.brandName || '—' }}{{ d.productSizeName ? ' / ' + d.productSizeName : '' }}
+                </td>
+                <td>{{ d.logisticUnitName }}</td>
+                <td class="num">{{ d.quantity | number: '1.2-2' }}</td>
+                <td class="num">S/ {{ d.unitPrice | number: '1.2-2' }}</td>
+                <td class="num">S/ {{ d.subtotal | number: '1.2-2' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty">
+                  {{ isView() ? t('salesPage.noLines') : t('salesPage.addFirstLine') }}
+                </td>
+              </tr>
+            }
+          </tbody>
+          @if (details().length) {
+            <tfoot>
+              <tr>
+                <td colspan="5">{{ t('salesPage.linesTotal') }}</td>
+                <td class="num amount">S/ {{ detailsTotal() | number: '1.2-2' }}</td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </div>
+    </div>
+
+    @if (!isView() && isCompleted()) {
+      <div class="page-body add-line-block">
+        <h3 class="page-section-title">{{ t('salesPage.addDetail') }}</h3>
+
+        <form [formGroup]="detailForm" (ngSubmit)="addDetail()" class="inline-form">
+          <div class="form-group grow-2">
+            <label>{{ t('salesPage.product') }}<span class="req">*</span></label>
+            <select formControlName="productId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (p of products(); track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('salesPage.brand') }}</label>
+            <select formControlName="brandId">
+              <option [ngValue]="null">—</option>
+              @for (b of brands(); track b.id) {
+                <option [value]="b.id">{{ b.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('salesPage.logisticUnit') }}<span class="req">*</span></label>
+            <select formControlName="logisticUnitId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (lu of logisticUnits(); track lu.id) {
+                <option [value]="lu.id">{{ lu.abbreviation }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group narrow">
+            <label>{{ t('salesPage.quantity') }}<span class="req">*</span></label>
+            <input type="number" formControlName="quantity" min="0.01" step="0.01" />
+          </div>
+
+          <div class="form-group narrow">
+            <label>{{ t('salesPage.unitPrice') }}<span class="req">*</span></label>
+            <input type="number" formControlName="unitPrice" min="0" step="0.01" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-icon-left">
+            <app-icon name="plus" [size]="15" />
+            {{ t('salesPage.addDetail') }}
+          </button>
+        </form>
+      </div>
+    }
+  }
+</app-form-page>
+
+<app-confirm-dialog
+  [open]="!!pendingVoid()"
+  [title]="t('salesPage.voidTitle')"
+  [message]="t('salesPage.voidConfirm', { id: pendingVoid()?.id })"
+  (confirm)="confirmVoid()"
+  (cancel)="cancelVoid()" />
+</ng-container>

@@ -1,0 +1,90 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('receptions.title')"
+  [title]="t('receptions.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group span-2">
+            <label>{{ t('receptions.guide') }}<span class="req">*</span></label>
+            <select formControlName="guideId" (change)="onGuideChange()"
+                    [attr.disabled]="loadingGuides() || !availableGuides().length ? true : null">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (g of availableGuides(); track g.id) {
+                <option [value]="g.id">
+                  {{ g.guideNumber }} — {{ g.supplierName }}
+                  ({{ t('guidesPage.status' + g.guideStatus) }})
+                </option>
+              }
+            </select>
+            @if (errorKey('guideId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+
+            @if (loadingGuides()) {
+              <span class="field-hint">{{ t('common.loading') }}</span>
+            } @else if (!availableGuides().length) {
+              <span class="field-error">{{ t('receptions.noReceivableGuides') }}</span>
+            } @else {
+              <span class="field-hint">
+                {{ t('receptions.guideHint') }}
+                @if (alreadyReceived() > 0) {
+                  {{ t('receptions.alreadyReceivedCount', { count: alreadyReceived() }) }}
+                }
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('receptions.receptionDate') }}<span class="req">*</span></label>
+            <input type="date" formControlName="receptionDate" />
+            @if (errorKey('receptionDate'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group span-2">
+            <label>{{ t('common.observations') }}</label>
+            <textarea formControlName="observations"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- El puesto no se elige: la recepción es de la guía entera. Se muestra a
+           qué puestos reparte para saber qué está llegando. -->
+      @if (loadingSummary() || stallSummary().length) {
+        <div class="page-body stalls-block">
+          <h3 class="page-section-title">{{ t('receptions.guideBreakdown') }}</h3>
+
+          @if (loadingSummary()) {
+            <p class="page-loading">{{ t('common.loading') }}</p>
+          } @else {
+            <ul class="stall-list">
+              @for (s of stallSummary(); track s.stallNumber) {
+                <li>
+                  <span class="stall-name">{{ s.stallNumber }} — {{ s.pavilionName }}</span>
+                  <span class="stall-figures">
+                    {{ s.lines }} {{ t('guidesPage.linesAdded') }}
+                    · {{ s.quantity | number: '1.0-2' }} {{ t('guidesPage.packages') }}
+                  </span>
+                </li>
+              }
+            </ul>
+            <p class="page-hint">{{ t('receptions.breakdownHint') }}</p>
+          }
+        </div>
+      }
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving() || !availableGuides().length">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

@@ -1,0 +1,79 @@
+<ng-container *transloco="let t">
+<div class="role-list-page">
+  <div class="page-header">
+    <h1>{{ t('rolesPage.title') }}</h1>
+    <button class="btn-primary" (click)="goCreate()">{{ t('rolesPage.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">{{ t('common.loading') }}</div>
+  } @else {
+    <div class="roles-grid">
+      @for (role of roles(); track role.id) {
+        <article class="role-card" [class.is-inactive]="role.status !== 1">
+          <!-- La tarjeta entera abre la ficha; las acciones de dentro paran la propagación. -->
+          <button type="button" class="role-open" (click)="goView(role)" [attr.aria-label]="t('rolesPage.openDetail')"></button>
+
+          <header class="role-top">
+            <div class="role-id-block">
+              <span class="role-name">{{ role.name | roleName }}</span>
+              <span class="role-key">{{ role.name }}</span>
+            </div>
+            <span class="badge badge-toggle"
+              [class.badge-active]="role.status === 1" [class.badge-inactive]="role.status !== 1"
+              (click)="toggleRoleStatus(role); $event.stopPropagation()"
+              [title]="role.status === 1 ? 'Clic para desactivar' : 'Clic para activar'">
+              {{ role.status === 1 ? t('common.active') : t('common.inactive') }}
+            </span>
+          </header>
+
+          <p class="role-description">{{ role.description }}</p>
+
+          <div class="role-coverage">
+            <div class="coverage-line">
+              <span>{{ t('rolesPage.coverage', { n: permissionCount(role.id), total: totalPermissions() }) }}</span>
+              <span class="coverage-pct">{{ coverage(role.id) }}%</span>
+            </div>
+            <div class="meter" role="presentation">
+              <i [style.width.%]="coverage(role.id)"></i>
+            </div>
+          </div>
+
+          @if (modulesOf(role.id); as mods) {
+            @if (mods.length) {
+              <div class="role-modules">
+                @for (m of mods; track m) {
+                  <span class="module-chip">{{ m }}</span>
+                }
+              </div>
+            } @else {
+              <p class="role-nomods">{{ t('rolesPage.noModules') }}</p>
+            }
+          }
+
+          <footer class="role-foot">
+            <span class="role-modcount">
+              {{ modulesOf(role.id).length === 1
+                  ? t('rolesPage.modulesCountOne')
+                  : t('rolesPage.modulesCount', { n: modulesOf(role.id).length }) }}
+            </span>
+            <span class="role-actions">
+              <button class="btn-icon" [title]="t('common.view')" (click)="goView(role); $event.stopPropagation()">👁️</button>
+              <button class="btn-icon" [title]="t('common.edit')" (click)="goEdit(role); $event.stopPropagation()">✏️</button>
+              <button class="btn-icon btn-danger-icon" [title]="t('common.delete')" (click)="deleteRole(role); $event.stopPropagation()">🗑️</button>
+            </span>
+          </footer>
+        </article>
+      } @empty {
+        <div class="empty">{{ t('rolesPage.notFound') }}</div>
+      }
+    </div>
+  }
+</div>
+</ng-container>

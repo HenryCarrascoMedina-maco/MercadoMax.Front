@@ -1,0 +1,127 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('users.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('users.createTitle')"
+  [subtitle]="isEdit() && record() ? record()!.email : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('auth.firstName') }}<span class="req">*</span></label>
+            <input formControlName="firstName" [placeholder]="t('auth.firstName')" />
+            @if (errorKey('firstName'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('auth.lastName') }}<span class="req">*</span></label>
+            <input formControlName="lastName" [placeholder]="t('auth.lastName')" />
+            @if (errorKey('lastName'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('common.email') }}<span class="req">*</span></label>
+            <input formControlName="email" type="email" placeholder="correo@ejemplo.com" />
+            @if (errorKey('email'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('auth.phoneOptional') }}</label>
+            <input formControlName="phoneNumber" placeholder="+51 999 999 999" />
+          </div>
+
+          @if (!isEdit()) {
+            <div class="form-group">
+              <label>{{ t('common.password') }}<span class="req">*</span></label>
+              <input formControlName="password" type="password" [placeholder]="t('common.password')" />
+              @if (errorKey('password'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+            </div>
+          }
+        </div>
+
+        @if (!isEdit()) {
+          <p class="page-hint">{{ t('users.rolesAfterCreateHint') }}</p>
+        }
+      </div>
+
+      @if (isEdit()) {
+        <div class="page-body access-block">
+          <h3 class="page-section-title">{{ t('users.rolesSection') }}</h3>
+          <div class="roles-grid">
+            @for (role of allRoles(); track role.id) {
+              <label class="role-checkbox" [class.active]="isRoleAssigned(role.id)">
+                <input type="checkbox" [checked]="isRoleAssigned(role.id)" (change)="toggleRole(role.id)" />
+                <span class="role-name">{{ role.name | roleName }}</span>
+                <span class="role-desc">{{ role.description }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="page-body access-block">
+          <div class="permissions-header" (click)="showPermissionsPanel.set(!showPermissionsPanel())">
+            <h3 class="page-section-title">
+              {{ t('users.permissionsSection') }}
+              <span class="toggle-icon">{{ showPermissionsPanel() ? '▲' : '▼' }}</span>
+              @if (userPermissionIds().size > 0) {
+                <span class="perm-count">{{ userPermissionIds().size }}</span>
+              }
+            </h3>
+          </div>
+
+          @if (showPermissionsPanel()) {
+            <!-- Los permisos se derivan de los roles marcados: la leyenda explica
+                 por qué unos cambian solos al tocar un rol y otros no. -->
+            <div class="perm-legend">
+              <span class="legend-item"><i class="swatch swatch-role"></i>{{ t('users.permFromRole') }}</span>
+              <span class="legend-item"><i class="swatch swatch-extra"></i>{{ t('users.permExtra') }}</span>
+              @if (extraCount() > 0) {
+                <button type="button" class="btn-link" (click)="resetToRoles()">
+                  {{ t('users.resetToRoles') }}
+                </button>
+              }
+            </div>
+
+            <div class="permissions-modules">
+              @for (module of permissionModules; track module) {
+                <div class="perm-module">
+                  <div class="perm-module-name">{{ module }}</div>
+                  <div class="perm-actions-grid">
+                    @for (perm of getPermissionsForModule(module); track perm.id) {
+                      <label class="perm-checkbox"
+                             [class.active]="isFromRole(perm.id)"
+                             [class.extra]="isExtra(perm.id)"
+                             [title]="isFromRole(perm.id) ? t('users.permFromRole') : (isExtra(perm.id) ? t('users.permExtra') : '')">
+                        <input type="checkbox"
+                               [checked]="isPermissionAssigned(perm.id)"
+                               (change)="togglePermission(perm.id)" />
+                        <span>{{ perm.action }}</span>
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.processing') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

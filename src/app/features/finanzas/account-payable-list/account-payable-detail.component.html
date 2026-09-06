@@ -1,0 +1,170 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('accountPayables.title')"
+  [title]="isView() ? t('accountPayables.viewTitle') : t('accountPayables.managePayments')"
+  [crumb]="isView() ? t('common.view') : t('accountPayables.managePayments')"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record(); as h) {
+    <div class="page-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ t('accountPayables.stall') }}</span>
+          <span class="detail-value">{{ h.stallNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('accountPayables.supplier') }}</span>
+          <span class="detail-value">{{ h.supplierName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('accountPayables.guide') }}</span>
+          <span class="detail-value mono">{{ h.guideNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('accountPayables.dueDate') }}</span>
+          @if (h.dueDate) {
+            <span class="due" [class.due-overdue]="isOverdue(h)">
+              @if (isOverdue(h)) { <app-icon name="clock" [size]="14" /> }
+              {{ h.dueDate | date: 'dd/MM/yyyy' }}
+            </span>
+            @if (!isPaid() && dueInfo(h.dueDate); as info) {
+              <span class="due-note" [class.due-overdue]="info.key === 'overdueBy'">
+                {{ t('accountPayables.' + info.key, { days: info.days }) }}
+              </span>
+            }
+          } @else {
+            <span class="detail-value is-empty">{{ t('accountPayables.noDueDate') }}</span>
+          }
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ t('common.status') }}</span>
+          <span class="status"
+                [class.status-paid]="h.accountStatus === 'Paid'"
+                [class.status-partial]="h.accountStatus === 'PartiallyPaid'"
+                [class.status-pending]="h.accountStatus === 'Pending'">
+            <i class="dot"></i>
+            @if (h.accountStatus === 'Paid') { {{ t('accountPayables.statusPaid') }} }
+            @else if (h.accountStatus === 'PartiallyPaid') { {{ t('accountPayables.statusPartial') }} }
+            @else { {{ t('accountPayables.statusPending') }} }
+          </span>
+        </div>
+      </div>
+
+      <div class="money-panel">
+        <div class="money-grid">
+          <div class="money">
+            <span>{{ t('accountPayables.totalAmount') }}</span>
+            <strong>S/ {{ h.totalAmount | number: '1.2-2' }}</strong>
+          </div>
+          <div class="money money-paid">
+            <span>{{ t('accountPayables.paidAmount') }}</span>
+            <strong>S/ {{ h.paidAmount | number: '1.2-2' }}</strong>
+          </div>
+          <div class="money money-balance">
+            <span>{{ t('accountPayables.remaining') }}</span>
+            <strong>S/ {{ h.balance | number: '1.2-2' }}</strong>
+          </div>
+        </div>
+        <div class="progress progress-lg">
+          <div class="progress-bar"
+               [class.full]="paidPercent(h) >= 100"
+               [style.width.%]="paidPercent(h)"></div>
+        </div>
+        <span class="progress-caption">{{ paidPercent(h) }}%</span>
+      </div>
+
+      @if (!isView() && isPaid()) {
+        <div class="alert alert-success">
+          <app-icon name="check" [size]="16" />
+          <span>{{ t('accountPayables.paidHint') }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="page-body payments-block">
+      <h3 class="page-section-title">{{ t('accountPayables.paymentsTitle') }}</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th class="num">{{ t('accountPayables.amount') }}</th>
+              <th>{{ t('accountPayables.paymentMethod') }}</th>
+              <th>{{ t('accountPayables.operationNumber') }}</th>
+              <th>{{ t('common.date') }}</th>
+              <th>{{ t('common.user') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of payments(); track p.id) {
+              <tr>
+                <td class="num">S/ {{ p.amount | number: '1.2-2' }}</td>
+                <td>
+                  @switch (p.paymentMethod) {
+                    @case ('Cash') { {{ t('accountPayables.methodCash') }} }
+                    @case ('Transfer') { {{ t('accountPayables.methodTransfer') }} }
+                    @case ('Check') { {{ t('accountPayables.methodCheck') }} }
+                    @default { {{ p.paymentMethod }} }
+                  }
+                </td>
+                <td [class.muted]="!p.operationNumber" class="mono">{{ p.operationNumber || '—' }}</td>
+                <td>{{ p.paymentDate | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ p.userName }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="empty">{{ t('accountPayables.noPayments') }}</td></tr>
+            }
+          </tbody>
+          @if (payments().length) {
+            <tfoot>
+              <tr>
+                <td class="num amount">S/ {{ paymentsTotal() | number: '1.2-2' }}</td>
+                <td colspan="4">{{ t('accountPayables.paymentsTotal') }}</td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </div>
+    </div>
+
+    @if (!isView() && !isPaid()) {
+      <div class="page-body add-payment-block">
+        <h3 class="page-section-title">{{ t('accountPayables.addPayment') }}</h3>
+
+        <form [formGroup]="paymentForm" (ngSubmit)="addPayment()" class="inline-form">
+          <div class="form-group narrow">
+            <label>{{ t('accountPayables.amount') }}<span class="req">*</span></label>
+            <input type="number" formControlName="amount" min="0.01" [max]="h.balance" step="0.01" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('accountPayables.paymentMethod') }}<span class="req">*</span></label>
+            <select formControlName="paymentMethod">
+              <option value="Cash">{{ t('accountPayables.methodCash') }}</option>
+              <option value="Transfer">{{ t('accountPayables.methodTransfer') }}</option>
+              <option value="Check">{{ t('accountPayables.methodCheck') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group grow-2">
+            <label>{{ t('accountPayables.operationNumber') }}</label>
+            <input type="text" formControlName="operationNumber" [placeholder]="t('common.optional')" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-icon-left">
+            <app-icon name="plus" [size]="15" />
+            {{ t('accountPayables.addPayment') }}
+          </button>
+        </form>
+      </div>
+    }
+  }
+</app-form-page>
+</ng-container>

@@ -1,0 +1,33 @@
+// Base heredada (tarjeta, tabla, botones, modal) + sistema de listados del ERP.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+.sales-page { max-width: 1440px; }
+
+// La búsqueda pesa el doble: es el filtro que más se usa.
+.filter-grid .field-search { grid-column: span 2; }
+
+.quick-ranges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+
+  .quick-ranges-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+  }
+}
+
+// Una venta anulada se atenúa: sigue consultable pero deja de competir por atención.
+table tr.row-voided td:not(.col-actions) { opacity: 0.55; }
+
+@media (max-width: 720px) {
+  .filter-grid .field-search { grid-column: span 1; }
+  .quick-ranges { flex-direction: column; align-items: flex-start; }
+}

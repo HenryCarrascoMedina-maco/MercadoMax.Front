@@ -1,0 +1,134 @@
+/* Global styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Theme variables ───────────────────────────── */
+:root {
+  /* Ancho máximo de las páginas de listado.
+     100% = la tabla ocupa todo el espacio disponible y se encoge con la ventana.
+     Cambiar a p.ej. 1600px si algún día se quiere limitar en pantallas enormes. */
+  --page-max-width: 100%;
+}
+
+/* Modo claro — paleta "Slate Claro".
+   Hermana directa de "Slate Profundo": los mismos neutros azulados de la
+   familia Slate, al derecho. El sidebar se queda en #1E293B y no en el
+   #0B1120 del tema oscuro porque sobre contenido claro un slab casi negro
+   pesa demasiado. Todos los pares cumplen WCAG AA como mínimo. */
+:root,
+[data-theme="light"] {
+  --bg-body: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f1f5f9;
+  --sidebar-hover: rgba(255, 255, 255, 0.10);
+  --sidebar-active: rgba(129, 140, 248, 0.30);
+  --sidebar-muted: #94a3b8;
+  --sidebar-border: rgba(255, 255, 255, 0.10);
+  --topbar-bg: #ffffff;
+  --topbar-shadow: 0 1px 3px rgba(15, 23, 42, 0.07);
+  --hover-bg: #f1f5f9;
+  --primary-color: #4f46e5;
+  --on-primary: #ffffff;   /* texto sobre --primary-color */
+  --badge-active-bg: #dcfce7;
+  --badge-active-text: #15803d;
+  --badge-inactive-bg: #fee2e2;
+  --badge-inactive-text: #b91c1c;
+  --alert-success-bg: #dcfce7;
+  --alert-error-bg: #fee2e2;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --modal-overlay: rgba(15, 23, 42, 0.45);
+  --modal-bg: #ffffff;
+  --table-header-bg: #f8fafc;
+  --table-stripe-bg: #f8fafc;
+  --badge-inbound-bg: #dcfce7;
+  --badge-inbound-text: #15803d;
+  --badge-outbound-bg: #fee2e2;
+  --badge-outbound-text: #b91c1c;
+  --badge-adjustment-bg: #fef3c7;
+  --badge-adjustment-text: #92570a;
+  --row-warning-bg: #fef3c7;
+  --row-warning-text: #92570a;
+}
+
+/* Modo oscuro — paleta "Slate Profundo".
+   Neutros azulados de la familia Slate: el índigo de la marca deja de ser
+   una isla y pasa a ser el extremo oscuro de una escala continua. */
+[data-theme="dark"] {
+  --bg-body: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-hover: #273449;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --sidebar-bg: #0b1120;
+  --sidebar-text: #f1f5f9;
+  --sidebar-hover: rgba(129, 140, 248, 0.14);
+  --sidebar-active: rgba(129, 140, 248, 0.22);
+  --sidebar-muted: #94a3b8;
+  --sidebar-border: rgba(255, 255, 255, 0.09);
+  --topbar-bg: #1e293b;
+  --topbar-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --hover-bg: #273449;
+  --primary-color: #818cf8;
+  --on-primary: #0b1120;   /* el acento es claro: encima va tinta oscura */
+  --badge-active-bg: #10291c;
+  --badge-active-text: #4ade80;
+  --badge-inactive-bg: #2d1517;
+  --badge-inactive-text: #f87171;
+  --alert-success-bg: #10291c;
+  --alert-error-bg: #2d1517;
+  --input-bg: #172033;
+  --input-border: #3b4a61;
+  --modal-overlay: rgba(0, 0, 0, 0.72);
+  --modal-bg: #1e293b;
+  --table-header-bg: #22304a;
+  --table-stripe-bg: #22304a;
+  --badge-inbound-bg: #10291c;
+  --badge-inbound-text: #4ade80;
+  --badge-outbound-bg: #2d1517;
+  --badge-outbound-text: #f87171;
+  --badge-adjustment-bg: #2e2410;
+  --badge-adjustment-text: #fbbf24;
+  --row-warning-bg: #2e2410;
+  --row-warning-text: #fbbf24;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── Common theme-aware overrides ──────────────── */
+input, select, textarea {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+table {
+  color: var(--text-primary);
+}
+
+.alert-success { background: var(--alert-success-bg) !important; }
+.alert-error   { background: var(--alert-error-bg) !important; }
+
+.badge-active  { background: var(--badge-active-bg); color: var(--badge-active-text); }
+.badge-inactive { background: var(--badge-inactive-bg); color: var(--badge-inactive-text); }

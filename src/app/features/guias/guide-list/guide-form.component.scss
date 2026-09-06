@@ -1,0 +1,34 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// Indicador de paso: dos rutas, no dos pestañas de un modal.
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 12px;
+
+  .step {
+    padding: 5px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .step-active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .step-done {
+    border-color: var(--badge-active-text);
+    color: var(--badge-active-text);
+    font-weight: 600;
+  }
+
+  .step-sep { color: var(--text-muted); }
+}

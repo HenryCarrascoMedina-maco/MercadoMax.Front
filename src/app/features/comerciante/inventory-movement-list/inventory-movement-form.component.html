@@ -1,0 +1,69 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('inventoryMovements.title')"
+  [title]="t('inventoryMovements.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <p class="page-hint">{{ t('inventoryMovements.requiredHint') }}</p>
+
+        <div class="page-grid">
+          <div class="form-group span-2">
+            <label>{{ t('inventoryMovements.inventoryFilter') }}<span class="req">*</span></label>
+            <select formControlName="inventoryId">
+              <option [ngValue]="null">{{ t('common.select') }}</option>
+              @for (inv of inventoryList(); track inv.id) {
+                <option [value]="inv.id">{{ inv.productName }} — {{ inv.stallCode }}</option>
+              }
+            </select>
+            @if (errorKey('inventoryId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventoryMovements.movementType') }}<span class="req">*</span></label>
+            <select formControlName="movementType">
+              @for (type of movementTypes; track type) {
+                <option [value]="type">{{ t('inventoryMovements.type_' + type) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventoryMovements.quantity') }}<span class="req">*</span></label>
+            <input type="number" formControlName="quantity" min="0.01" step="0.01" />
+            @if (errorKey('quantity'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventoryMovements.referenceType') }}</label>
+            <input type="text" formControlName="referenceType" [placeholder]="t('common.optional')" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('inventoryMovements.referenceId') }}</label>
+            <input type="number" formControlName="referenceId" [placeholder]="t('common.optional')" />
+          </div>
+
+          <div class="form-group span-2">
+            <label>{{ t('common.observationsOptional') }}</label>
+            <textarea formControlName="observations" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.processing') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

@@ -1,0 +1,247 @@
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/form-page' as *;
+
+// Indicador de paso: dos rutas, no dos pestañas de un modal.
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 12px;
+
+  .step {
+    padding: 5px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .step-active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .step-done {
+    border-color: var(--badge-active-text);
+    color: var(--badge-active-text);
+    font-weight: 600;
+  }
+
+  .step-sep { color: var(--text-muted); }
+}
+
+.header-block,
+.lines-block,
+.add-line-block {
+  border-top: 1px solid var(--border-color);
+}
+
+.lines-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+
+  .lines-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.lines-block .table-container { box-shadow: none; }
+.lines-block table { min-width: 760px; }
+.lines-block th.num,
+.lines-block td.num { text-align: right; }
+.lines-block td.num { font-variant-numeric: tabular-nums; }
+.lines-block .muted { color: var(--text-muted); font-size: 12px; }
+
+.line-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+// Categoría a la que queda atada la guía: se muestra junto al título de las
+// líneas para que la restricción del desplegable no parezca un fallo.
+.category-lock {
+  margin-left: 9px;
+  padding: 2px 10px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+// Aclara por qué "Finalizar" está apagado, en la misma fila que el botón.
+.footer-note {
+  margin-right: auto;
+  align-self: center;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+// ── Ocupación del camión ──────────────────────────────────
+.load-block { border-top: 1px solid var(--border-color); }
+
+.load-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+
+  .page-section-title { margin-bottom: 0; }
+
+  .load-figures {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    &.over { color: var(--badge-inactive-text); font-weight: 700; }
+  }
+}
+
+.load-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bg-surface-hover);
+  overflow: hidden;
+}
+
+.load-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--badge-active-text);
+  transition: width .25s ease;
+
+  &.warn { background: #b26a00; }
+  &.over { background: var(--badge-inactive-text); }
+}
+
+.load-note {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+
+  &.warn { color: #b26a00; }
+  &.over { color: var(--badge-inactive-text); font-weight: 600; }
+}
+
+.line-warning {
+  margin-right: auto;
+  align-self: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--badge-inactive-text);
+}
+
+.footer-note.over { color: var(--badge-inactive-text); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .load-fill { transition: none; }
+}
+
+// ── Subguías ──────────────────────────────────────────────
+// Cada puesto es un bloque con su cabecera: es lo que se descarga junto.
+.subguide {
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  overflow: hidden;
+
+  & + .subguide { margin-top: 12px; }
+}
+
+.subguide-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 11px 14px;
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.subguide-id {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+
+  .subguide-number {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-color);
+    white-space: nowrap;
+  }
+
+  .subguide-stall {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.subguide-totals {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+
+  .sep { color: var(--text-muted); }
+
+  // El asterisco avisa de que faltan pesos y el total no es completo.
+  .partial { color: #b26a00; cursor: help; }
+}
+
+// Dentro del bloque la tabla ya está enmarcada: sin sombra ni doble borde.
+.subguide .table-container {
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.subguide table { min-width: 560px; }
+
+.empty-lines {
+  margin: 0;
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  border-radius: 9px;
+}
+
+.lines-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-top: 2px solid var(--border-color);
+
+  span {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+  strong {
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+}

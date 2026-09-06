@@ -1,0 +1,111 @@
+<ng-container *transloco="let t">
+  <div class="dashboard-shell">
+    <section class="hero-card">
+      <div>
+        <span class="eyebrow">{{ t('dashboardPage.heroLabel') }}</span>
+        <h1>{{ t('dashboard.welcome', { name: auth.fullName() }) }}</h1>
+        <p class="subtitle">{{ t('dashboardPage.subtitle') }}</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="meta-box">
+          <span class="meta-label">{{ t('dashboardPage.currentRoles') }}</span>
+          <strong>{{ (auth.roles() | roleName) || '—' }}</strong>
+        </div>
+        @if (bundle(); as dashboard) {
+          <div class="meta-box">
+            <span class="meta-label">{{ t('dashboardPage.generatedAt') }}</span>
+            <strong>{{ dashboard.generatedAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+          </div>
+        }
+        <button class="btn btn-secondary" (click)="load()">{{ t('dashboardPage.actions.refresh') }}</button>
+      </div>
+    </section>
+
+    @if (loading()) {
+      <div class="state-box">{{ t('common.loading') }}</div>
+    } @else if (error()) {
+      <div class="state-box state-error">{{ error() }}</div>
+    } @else if (bundle(); as dashboard) {
+      <div class="section-stack">
+        @for (section of dashboard.sections; track section.roleKey) {
+          <section class="dashboard-section">
+            <div class="section-header">
+              <div>
+                <h2>{{ t(section.titleKey) }}</h2>
+                <p>{{ t(section.subtitleKey) }}</p>
+              </div>
+              <div class="section-actions">
+                <button class="btn btn-secondary" (click)="exportExcel(section)">{{ t('dashboardPage.actions.exportExcel') }}</button>
+                <button class="btn btn-primary" (click)="exportPdf(section)">{{ t('dashboardPage.actions.exportPdf') }}</button>
+              </div>
+            </div>
+
+            @if (section.metrics.length > 0) {
+              <div class="metric-grid">
+                @for (metric of section.metrics; track metric.key) {
+                  <article class="metric-card"
+                    [class.tone-positive]="metric.tone === 'positive'"
+                    [class.tone-warning]="metric.tone === 'warning'"
+                    [class.tone-danger]="metric.tone === 'danger'">
+                    <span class="metric-label">{{ t(metric.labelKey) }}</span>
+                    <strong class="metric-value">{{ formatMetric(metric) }}</strong>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="state-inline">{{ t('dashboardPage.noMetrics') }}</div>
+            }
+
+            @if (section.insights.length > 0) {
+              <div class="insights-panel">
+                <h3>{{ t('dashboardPage.insightsTitle') }}</h3>
+                <div class="insight-grid">
+                  @for (insight of section.insights; track insight.labelKey) {
+                    <div class="insight-chip">
+                      <span>{{ t(insight.labelKey) }}</span>
+                      <strong>{{ formatDisplay(insight.value, insight.format) }}</strong>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (section.table; as table) {
+              <div class="table-panel">
+                <div class="table-title-row">
+                  <h3>{{ t(table.titleKey) }}</h3>
+                </div>
+
+                @if (table.rows.length > 0) {
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          @for (column of table.columns; track column.key) {
+                            <th>{{ t(column.labelKey) }}</th>
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of table.rows; track $index) {
+                          <tr>
+                            @for (column of table.columns; track column.key) {
+                              <td>{{ formatCell(column, row[column.key]) }}</td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                } @else {
+                  <div class="state-inline">{{ t(table.emptyKey) }}</div>
+                }
+              </div>
+            }
+          </section>
+        }
+      </div>
+    }
+  </div>
+</ng-container>

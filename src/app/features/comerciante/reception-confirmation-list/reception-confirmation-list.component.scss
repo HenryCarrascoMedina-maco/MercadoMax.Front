@@ -1,0 +1,13 @@
+// Base heredada (tarjeta, tabla, botones, modal) + sistema de listados del ERP.
+@use '../../maestros/master-list' as *;
+@use '../../../shared/styles/erp-page' as *;
+
+// Cinco columnas: no necesita el ancho de los listados de finanzas.
+.confirmations-page { max-width: 1200px; }
+
+// El puesto define la lista: pesa el doble que las fechas.
+.filter-grid .field-stall { grid-column: span 2; }
+
+@media (max-width: 720px) {
+  .filter-grid .field-stall { grid-column: span 1; }
+}

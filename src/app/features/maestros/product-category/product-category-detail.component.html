@@ -1,0 +1,67 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('categories.title')"
+  [title]="record()?.name || t('common.view')"
+  [crumb]="record()?.name || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  <button pageActions type="button" class="btn btn-primary"
+          *hasPermission="'Masters:Update'"
+          (click)="goToEdit()">
+    {{ t('common.edit') }}
+  </button>
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+
+    <div class="page-body related-block">
+      <div class="related-head">
+        <h3>{{ t('categories.relatedProducts') }}</h3>
+        <span class="related-count">{{ products().length }} {{ t('common.records') }}</span>
+      </div>
+
+      @if (loadingProducts()) {
+        <div class="loading">{{ t('common.loading') }}</div>
+      } @else {
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ t('common.id') }}</th>
+                <th>{{ t('common.name') }}</th>
+                <th>{{ t('common.description') }}</th>
+                <th>{{ t('common.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of products(); track p.id) {
+                <tr>
+                  <td>{{ p.id }}</td>
+                  <td>{{ p.name }}</td>
+                  <td>{{ p.description || '—' }}</td>
+                  <td>
+                    <span class="badge" [class.badge-active]="p.status" [class.badge-inactive]="!p.status">
+                      {{ p.status ? t('common.active') : t('common.inactive') }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="empty">{{ t('categories.noRelatedProducts') }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</app-form-page>
+</ng-container>

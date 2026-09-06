@@ -1,0 +1,75 @@
+<ng-container *transloco="let t">
+<section class="master-list">
+  <div class="list-header">
+    <h2>{{ t('receptions.title') }}</h2>
+    <div class="list-actions">
+      <select class="filter-select" (change)="onFilterStatus($event)">
+        <option value="">{{ t('receptions.allStatuses') }}</option>
+        <option value="Pendiente">{{ t('receptions.statusPending') }}</option>
+        <option value="EnProceso">{{ t('receptions.statusInProcess') }}</option>
+        <option value="Completada">{{ t('receptions.statusCompleted') }}</option>
+        <option value="ConFaltantes">{{ t('receptions.statusWithShortages') }}</option>
+      </select>
+      <button class="btn btn-primary" (click)="goCreate()">{{ t('receptions.new') }}</button>
+    </div>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="table-container">
+    @if (loading()) {
+      <p class="loading-text">{{ t('common.loading') }}</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('receptions.guide') }}</th>
+            <th>{{ t('receptions.stall') }}</th>
+            <th>{{ t('receptions.receptionDate') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('receptions.details') }}</th>
+            <th>{{ t('common.observations') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.guideNumber }}</td>
+              <td>{{ item.stallCode }}</td>
+              <td>{{ item.receptionDate | date: 'dd/MM/yyyy' }}</td>
+              <td><span [class]="statusBadgeClass(item.receptionStatus)">{{ item.receptionStatus }}</span></td>
+              <td>{{ item.detailCount }}</td>
+              <td>{{ item.observations }}</td>
+              <td class="actions">
+                <button class="btn btn-sm" [title]="'Ver'" (click)="goView(item)">👁️</button>
+                @if (item.receptionStatus === 'Pendiente') {
+                  <button class="btn btn-sm btn-info" (click)="updateStatus(item, 'EnProceso')">{{ t('common.start') }}</button>
+                }
+                @if (item.receptionStatus === 'EnProceso') {
+                  <button class="btn btn-sm btn-success" (click)="updateStatus(item, 'Completada')">{{ t('common.complete') }}</button>
+                  <button class="btn btn-sm btn-warning" (click)="updateStatus(item, 'ConFaltantes')">{{ t('receptions.shortages') }}</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="empty">{{ t('receptions.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button class="btn btn-sm" [disabled]="pageNumber() <= 1" (click)="prevPage()">← {{ t('common.prev') }}</button>
+        <span>{{ t('common.page') }} {{ pageNumber() }} — {{ totalRecords() }} {{ t('common.records') }}</span>
+        <button class="btn btn-sm" [disabled]="pageNumber() * pageSize() >= totalRecords()" (click)="nextPage()">{{ t('common.next') }} →</button>
+      </div>
+    }
+  </div>
+</section>
+</ng-container>

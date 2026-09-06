@@ -1,0 +1,48 @@
+<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <h1>{{ t('productSizes.title') }}</h1>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('productSizes.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">{{ msg.text }}</div>
+  }
+
+  <div class="toolbar">
+    <select class="filter-select" (change)="onFilterProduct($event)">
+      <option value="">{{ t('productSizes.allProducts') }}</option>
+      @for (p of products(); track p.id) {
+        <option [value]="p.id">{{ p.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading">{{ t('common.loading') }}</div>
+    } @else {
+      <table>
+        <thead><tr><th>{{ t('common.id') }}</th><th>{{ t('common.name') }}</th><th>{{ t('productSizes.product') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.actions') }}</th></tr></thead>
+        <tbody>
+          @for (item of pagedItems(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.productName }}</td>
+              <td><span class="badge badge-toggle" [class.badge-active]="item.status" [class.badge-inactive]="!item.status" (click)="toggleStatus(item); $event.stopPropagation()" [title]="item.status ? 'Clic para desactivar' : 'Clic para activar'">{{ item.status ? t('common.active') : t('common.inactive') }}</span></td>
+              <td class="actions">                <button class="btn-icon" [title]="t('common.view')" (click)="goView(item)">👁️</button>                <button class="btn-icon" [title]="t('common.edit')" (click)="goEdit(item)">✏️</button>
+                <button class="btn-icon" [title]="t('common.delete')" (click)="deleteItem(item)">🗑️</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty">{{ t('productSizes.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <app-pagination [totalItems]="items().length" [currentPage]="currentPage()" [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" />
+</div>
+</ng-container>

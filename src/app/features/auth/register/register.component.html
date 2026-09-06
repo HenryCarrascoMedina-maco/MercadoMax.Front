@@ -1,0 +1,89 @@
+<ng-container *transloco="let t">
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>MercadoMAX</h1>
+      <p>{{ t('auth.register') }}</p>
+    </div>
+
+    @if (success()) {
+      <div class="alert alert-success">
+        <strong>{{ t('auth.accountCreated') }}</strong>
+        <p>{{ t('auth.accountCreatedMsg') }}</p>
+        <a routerLink="/login" class="btn-login-link">{{ t('auth.goToLogin') }}</a>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        @if (error()) {
+          <div class="alert alert-error">{{ error() }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">{{ t('auth.firstName') }}</label>
+            <input id="firstName" type="text" formControlName="firstName" placeholder="Juan" />
+            @if (form.get('firstName')?.touched && form.get('firstName')?.hasError('required')) {
+              <span class="field-error">{{ t('auth.firstNameRequired') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">{{ t('auth.lastName') }}</label>
+            <input id="lastName" type="text" formControlName="lastName" placeholder="Pérez" />
+            @if (form.get('lastName')?.touched && form.get('lastName')?.hasError('required')) {
+              <span class="field-error">{{ t('auth.lastNameRequired') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">{{ t('common.email') }}</label>
+          <input id="email" type="email" formControlName="email" placeholder="usuario&#64;ejemplo.com" autocomplete="email" />
+          @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+            <span class="field-error">{{ t('auth.emailRequired') }}</span>
+          }
+          @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+            <span class="field-error">{{ t('auth.emailInvalid') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="phone">{{ t('auth.phoneOptional') }}</label>
+          <input id="phone" type="tel" formControlName="phone" placeholder="999 999 999" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">{{ t('common.password') }}</label>
+          <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+          @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+            <span class="field-error">{{ t('auth.passwordRequired') }}</span>
+          }
+          @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
+            <span class="field-error">{{ t('auth.passwordMinLength') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">{{ t('auth.confirmPassword') }}</label>
+          <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Repite tu contraseña" autocomplete="new-password" />
+          @if (form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')) {
+            <span class="field-error">{{ t('auth.confirmPasswordRequired') }}</span>
+          }
+        </div>
+
+        <button type="submit" [disabled]="form.invalid || loading()" class="btn-register">
+          @if (loading()) {
+            <span class="spinner"></span> {{ t('auth.registering') }}
+          } @else {
+            {{ t('auth.createAccount') }}
+          }
+        </button>
+
+        <div class="login-link">
+          <a routerLink="/login">{{ t('auth.hasAccount') }}</a>
+        </div>
+      </form>
+    }
+  </div>
+</div>
+</ng-container>

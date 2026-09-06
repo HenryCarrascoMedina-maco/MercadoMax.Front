@@ -1,0 +1,51 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('products.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('products.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('common.name') }}<span class="req">*</span></label>
+            <input formControlName="name" [placeholder]="t('products.namePlaceholder')" />
+            @if (errorKey('name'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('products.category') }}<span class="req">*</span></label>
+            <select formControlName="categoryId">
+              <option [ngValue]="null" disabled>{{ t('products.selectCategory') }}</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+            @if (errorKey('categoryId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+
+          <div class="form-group span-2">
+            <label>{{ t('common.descriptionOptional') }}</label>
+            <textarea formControlName="description" [placeholder]="t('common.description')"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

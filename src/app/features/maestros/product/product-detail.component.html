@@ -1,0 +1,27 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('products.title')"
+  [title]="record()?.name || t('common.view')"
+  [crumb]="record()?.name || ''"
+  [subtitle]="recordId() ? '#' + recordId() : ''">
+
+  <button pageActions type="button" class="btn btn-primary"
+          *hasPermission="'Masters:Update'"
+          (click)="goToEdit()">
+    {{ t('common.edit') }}
+  </button>
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (record()) {
+    <div class="page-body">
+      <app-detail-view [items]="items()" />
+    </div>
+  }
+</app-form-page>
+</ng-container>

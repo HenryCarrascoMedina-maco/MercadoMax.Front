@@ -1,0 +1,65 @@
+<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <h1>{{ t('trucks.title') }}</h1>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('trucks.new') }}</button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">{{ msg.text }}</div>
+  }
+
+  <div class="toolbar">
+    <input type="text" [placeholder]="t('trucks.searchPlaceholder')" [value]="search()" (input)="onSearch($event)" class="search-input" />
+  </div>
+
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading">{{ t('common.loading') }}</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('trucks.licensePlate') }}</th>
+            <th>{{ t('trucks.carrier') }}</th>
+            <th>{{ t('trucks.capacity') }}</th>
+            <th>{{ t('trucks.brand') }}</th>
+            <th>{{ t('trucks.model') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of pagedItems(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.licensePlate }}</td>
+              <td>{{ item.carrierName }}</td>
+              <td>{{ item.capacity }}</td>
+              <td>{{ item.brand || '—' }}</td>
+              <td>{{ item.model || '—' }}</td>
+              <td>
+                <span class="badge badge-toggle" [class.badge-active]="item.status" [class.badge-inactive]="!item.status"
+                  (click)="toggleStatus(item); $event.stopPropagation()"
+                  [title]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
+                  {{ item.status ? t('common.active') : t('common.inactive') }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn-icon" [title]="t('common.view')" (click)="goView(item)">👁️</button>
+                <button class="btn-icon" [title]="t('common.edit')" (click)="goEdit(item)">✏️</button>
+                <button class="btn-icon" [title]="t('common.delete')" (click)="deleteItem(item)">🗑️</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="empty">{{ t('trucks.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <app-pagination [totalItems]="items().length" [currentPage]="currentPage()" [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" />
+</div>
+</ng-container>

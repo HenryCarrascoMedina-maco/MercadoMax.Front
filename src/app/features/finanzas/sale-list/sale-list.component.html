@@ -1,0 +1,210 @@
+<ng-container *transloco="let t">
+<div class="master-list-page sales-page">
+
+  <!-- ── Encabezado ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>{{ t('salesPage.title') }}</h1>
+      <span class="record-count">{{ totalRecords() }} {{ t('salesPage.records') }}</span>
+    </div>
+    <button *hasPermission="'Finance:Create'" class="btn btn-primary btn-icon-left" (click)="goCreate()">
+      <app-icon name="plus" [size]="16" />
+      {{ t('salesPage.new') }}
+    </button>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      <app-icon [name]="msg.type === 'success' ? 'check' : 'alert'" [size]="16" />
+      <span>{{ msg.text }}</span>
+    </div>
+  }
+
+  <!-- ── Panel de filtros ───────────────────────────────── -->
+  <section class="filter-card">
+    <div class="filter-card-head">
+      <span class="filter-card-title">{{ t('salesPage.filters') }}</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-chip">{{ t('salesPage.activeFilters', { count: activeFilterCount() }) }}</span>
+      }
+      <button type="button" class="btn-link" [disabled]="activeFilterCount() === 0" (click)="clearFilters()">
+        <app-icon name="reset" [size]="14" />
+        {{ t('salesPage.clearFilters') }}
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="field field-search">
+        <label>{{ t('common.search') }}</label>
+        <div class="input-with-icon">
+          <app-icon name="search" [size]="16" />
+          <input type="text" [value]="filterSearch()"
+                 (input)="filterSearch.set($any($event.target).value)" (keyup.enter)="applyFilters()"
+                 [placeholder]="t('salesPage.searchPlaceholder')" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{{ t('salesPage.stall') }}</label>
+        <select [value]="filterStallId() ?? ''"
+                (change)="filterStallId.set($any($event.target).value ? +$any($event.target).value : null); applyFilters()">
+          <option value="">{{ t('salesPage.allStalls') }}</option>
+          @for (s of stalls(); track s.id) {
+            <option [value]="s.id">{{ s.number }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('salesPage.paymentType') }}</label>
+        <select [value]="filterPaymentType()" (change)="filterPaymentType.set($any($event.target).value); applyFilters()">
+          <option value="">{{ t('salesPage.allPaymentTypes') }}</option>
+          <option value="Cash">{{ t('salesPage.paymentCash') }}</option>
+          <option value="Credit">{{ t('salesPage.paymentCredit') }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('common.status') }}</label>
+        <select [value]="filterSaleStatus()" (change)="filterSaleStatus.set($any($event.target).value); applyFilters()">
+          <option value="">{{ t('salesPage.allStatuses') }}</option>
+          <option value="Completed">{{ t('salesPage.statusCompleted') }}</option>
+          <option value="Voided">{{ t('salesPage.statusVoided') }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('salesPage.dateFrom') }}</label>
+        <input type="date" [value]="filterDateFrom()" (change)="onDateChange('from', $any($event.target).value)" />
+      </div>
+
+      <div class="field">
+        <label>{{ t('salesPage.dateTo') }}</label>
+        <input type="date" [value]="filterDateTo()" (change)="onDateChange('to', $any($event.target).value)" />
+      </div>
+    </div>
+
+    <div class="quick-ranges">
+      <span class="quick-ranges-label">{{ t('salesPage.quickRanges') }}</span>
+      <div class="segmented">
+        <button type="button" [class.active]="quickRange() === 'today'" (click)="setQuickRange('today')">{{ t('salesPage.today') }}</button>
+        <button type="button" [class.active]="quickRange() === 'last7'" (click)="setQuickRange('last7')">{{ t('salesPage.last7') }}</button>
+        <button type="button" [class.active]="quickRange() === 'month'" (click)="setQuickRange('month')">{{ t('salesPage.thisMonth') }}</button>
+        <button type="button" [class.active]="quickRange() === 'all'" (click)="setQuickRange('all')">{{ t('salesPage.allTime') }}</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Tabla ──────────────────────────────────────────── -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ t('common.id') }}</th>
+          <th>{{ t('salesPage.stall') }}</th>
+          <th class="col-grow">{{ t('salesPage.customer') }}</th>
+          <th>{{ t('salesPage.saleDate') }}</th>
+          <th class="num">{{ t('salesPage.total') }}</th>
+          <th>{{ t('salesPage.paymentType') }}</th>
+          <th class="num">{{ t('salesPage.detailCount') }}</th>
+          <th>{{ t('common.status') }}</th>
+          <th class="col-actions">{{ t('common.actions') }}</th>
+        </tr>
+      </thead>
+
+      @if (loading()) {
+        <tbody class="skeleton">
+          @for (r of skeletonRows; track $index) {
+            <tr>
+              @for (c of [1,2,3,4,5,6,7,8,9]; track $index) { <td><span class="bar"></span></td> }
+            </tr>
+          }
+        </tbody>
+      } @else {
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr [class.row-voided]="item.saleStatus === 'Voided'">
+              <td class="mono">#{{ item.id }}</td>
+              <td>{{ item.stallNumber }}</td>
+              <td class="col-grow" [class.muted]="!item.customerName">{{ item.customerName || '—' }}</td>
+              <td class="nowrap">{{ item.saleDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="num amount">S/ {{ item.totalAmount | number:'1.2-2' }}</td>
+              <td>
+                <span class="tag" [class.tag-good]="item.paymentType === 'Cash'" [class.tag-warn]="item.paymentType === 'Credit'">
+                  {{ item.paymentType === 'Cash' ? t('salesPage.paymentCash') : t('salesPage.paymentCredit') }}
+                </span>
+              </td>
+              <td class="num">{{ item.detailCount }}</td>
+              <td>
+                <span class="status" [class.status-ok]="item.saleStatus === 'Completed'" [class.status-void]="item.saleStatus === 'Voided'">
+                  <i class="dot"></i>
+                  {{ item.saleStatus === 'Completed' ? t('salesPage.statusCompleted') : t('salesPage.statusVoided') }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <div class="row-actions">
+                  <button *hasPermission="'Finance:Read'" type="button" class="act"
+                          [title]="t('common.view')" [attr.aria-label]="t('common.view')" (click)="goView(item)">
+                    <app-icon name="eye" [size]="17" />
+                  </button>
+                  <button *hasPermission="'Finance:Update'" type="button" class="act"
+                          [title]="t('common.edit')" [attr.aria-label]="t('common.edit')"
+                          [disabled]="item.saleStatus !== 'Completed'" (click)="goEdit(item)">
+                    <app-icon name="edit" [size]="17" />
+                  </button>
+                  <button *hasPermission="'Finance:Update'" type="button" class="act act-danger"
+                          [title]="t('common.delete')" [attr.aria-label]="t('common.delete')"
+                          [disabled]="item.saleStatus !== 'Completed'" (click)="askVoid(item)">
+                    <app-icon name="trash" [size]="17" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="empty-row">
+              <td colspan="9">
+                <div class="empty-state">
+                  <app-icon name="receipt" [size]="40" [strokeWidth]="1.5" />
+                  <p class="empty-title">{{ t('salesPage.emptyTitle') }}</p>
+                  <p class="empty-hint">{{ t('salesPage.emptyHint') }}</p>
+                  <button *hasPermission="'Finance:Create'" class="btn btn-primary btn-icon-left" (click)="goCreate()">
+                    <app-icon name="plus" [size]="16" />
+                    {{ t('salesPage.new') }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+
+        @if (items().length) {
+          <tfoot>
+            <tr>
+              <td colspan="4">{{ t('salesPage.pageTotal') }}</td>
+              <td class="num amount">S/ {{ pageTotal() | number:'1.2-2' }}</td>
+              <td colspan="4"></td>
+            </tr>
+          </tfoot>
+        }
+      }
+    </table>
+  </div>
+
+  <app-pagination
+    [totalItems]="totalRecords()"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
+</div>
+
+<!-- ── Modal: nueva venta ───────────────────────────────── -->
+
+<!-- Confirmación de anulación (acción "eliminar") -->
+<app-confirm-dialog
+  [open]="!!pendingVoid()"
+  [title]="t('salesPage.voidTitle')"
+  [message]="t('salesPage.voidConfirm', { id: pendingVoid()?.id })"
+  (confirm)="confirmVoid()"
+  (cancel)="cancelVoid()" />
+</ng-container>

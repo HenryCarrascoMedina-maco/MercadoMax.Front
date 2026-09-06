@@ -1,0 +1,55 @@
+<ng-container *transloco="let t">
+<app-form-page
+  [listLink]="listPath"
+  [listTitle]="t('brands.title')"
+  [title]="pageTitle()"
+  [crumb]="isEdit() ? t('common.edit') : t('brands.createTitle')">
+
+  @if (message(); as msg) {
+    <div pageAlert class="alert alert-error">{{ msg.text }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loading">{{ t('common.loading') }}</div>
+  } @else if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="page-body">
+        <div class="page-grid">
+          <div class="form-group">
+            <label>{{ t('common.name') }}<span class="req">*</span></label>
+            <input formControlName="name" [placeholder]="t('brands.namePlaceholder')" />
+            @if (errorKey('name'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('brands.supplier') }}<span class="req">*</span></label>
+            <select formControlName="supplierId">
+              <option [ngValue]="null" disabled>{{ t('common.select') }}</option>
+              @for (o of suppliers(); track o.id) {
+                <option [value]="o.id">{{ o.businessName }}</option>
+              }
+            </select>
+            @if (errorKey('supplierId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+          <div class="form-group">
+            <label>{{ t('brands.product') }}<span class="req">*</span></label>
+            <select formControlName="productId">
+              <option [ngValue]="null" disabled>{{ t('common.select') }}</option>
+              @for (o of products(); track o.id) {
+                <option [value]="o.id">{{ o.name }}</option>
+              }
+            </select>
+            @if (errorKey('productId'); as ek) { <span class="field-error">{{ t(ek) }}</span> }
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? t('common.saving') : t('common.save') }}
+        </button>
+      </div>
+    </form>
+  }
+</app-form-page>
+</ng-container>

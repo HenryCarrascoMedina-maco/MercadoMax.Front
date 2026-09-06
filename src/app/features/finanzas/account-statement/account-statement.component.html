@@ -1,0 +1,206 @@
+<ng-container *transloco="let t">
+<div class="master-list-page statement-page">
+
+  <!-- ── Encabezado ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>{{ t('accountStatementPage.title') }}</h1>
+      @if (data(); as d) {
+        <span class="record-count">{{ d.details.length }} {{ t('accountStatementPage.accounts') }}</span>
+      }
+    </div>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      <app-icon [name]="msg.type === 'success' ? 'check' : 'alert'" [size]="16" />
+      <span>{{ msg.text }}</span>
+    </div>
+  }
+
+  <!-- ── Panel de filtros ───────────────────────────────── -->
+  <section class="filter-card">
+    <div class="filter-card-head">
+      <span class="filter-card-title">{{ t('accountStatementPage.filters') }}</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-chip">{{ t('accountStatementPage.activeFilters', { count: activeFilterCount() }) }}</span>
+      }
+      <button type="button" class="btn-link" [disabled]="activeFilterCount() === 0" (click)="clearFilters()">
+        <app-icon name="reset" [size]="14" />
+        {{ t('accountStatementPage.clearFilters') }}
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="field field-stall">
+        <label>{{ t('accountStatementPage.stall') }}</label>
+        <select [value]="selectedStallId() ?? ''" (change)="onStallChange($any($event.target).value)">
+          <option value="">{{ t('accountStatementPage.selectStall') }}</option>
+          @for (s of stalls(); track s.id) {
+            <option [value]="s.id">{{ s.number }} — {{ s.ownerName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>{{ t('accountStatementPage.dateFrom') }}</label>
+        <input type="date" [value]="filterDateFrom()" (change)="filterDateFrom.set($any($event.target).value)" />
+      </div>
+
+      <div class="field">
+        <label>{{ t('accountStatementPage.dateTo') }}</label>
+        <input type="date" [value]="filterDateTo()" (change)="filterDateTo.set($any($event.target).value)" />
+      </div>
+
+      <div class="field field-action">
+        <button class="btn btn-primary btn-icon-left" (click)="load()" [disabled]="!selectedStallId() || loading()">
+          <app-icon name="receipt" [size]="16" />
+          {{ loading() ? t('common.processing') : t('accountStatementPage.generate') }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="summary-skeleton">
+      @for (k of [1,2,3,4]; track $index) { <div class="sk-card"><span class="bar"></span><span class="bar bar-lg"></span></div> }
+    </div>
+    <div class="table-container">
+      <table>
+        <tbody class="skeleton">
+          @for (r of skeletonRows; track $index) {
+            <tr>@for (c of [1,2,3,4,5,6,7,8,9]; track $index) { <td><span class="bar"></span></td> }</tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (data()?.summary; as summary) {
+
+    <!-- ── Resumen del puesto ───────────────────────────── -->
+    <section class="summary-panel">
+      <div class="summary-head">
+        <h3>{{ t('accountStatementPage.summaryTitle') }}</h3>
+        <span class="summary-who">{{ summary.stallNumber }} · {{ summary.ownerName }} · {{ summary.pavilionName }}</span>
+      </div>
+
+      <div class="money-grid">
+        <div class="money">
+          <span>{{ t('accountStatementPage.totalDebt') }}</span>
+          <strong>S/ {{ summary.totalDebt | number:'1.2-2' }}</strong>
+        </div>
+        <div class="money money-paid">
+          <span>{{ t('accountStatementPage.totalPaid') }}</span>
+          <strong>S/ {{ summary.totalPaid | number:'1.2-2' }}</strong>
+        </div>
+        <div class="money money-balance">
+          <span>{{ t('accountStatementPage.totalBalance') }}</span>
+          <strong>S/ {{ summary.totalBalance | number:'1.2-2' }}</strong>
+        </div>
+        <div class="money money-count">
+          <span>{{ t('accountStatementPage.accountCount') }}</span>
+          <strong>{{ summary.accountCount }}</strong>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          <span>{{ t('accountStatementPage.coverage') }}</span>
+          <strong>{{ paidPercent() }}%</strong>
+        </div>
+        <div class="progress progress-lg">
+          <div class="progress-bar" [class.full]="paidPercent() >= 100" [style.width.%]="paidPercent()"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Detalle de cuentas ───────────────────────────── -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th class="col-grow">{{ t('accountStatementPage.supplier') }}</th>
+            <th>{{ t('accountStatementPage.guide') }}</th>
+            <th class="num">{{ t('accountStatementPage.totalAmount') }}</th>
+            <th class="num">{{ t('accountStatementPage.paidAmount') }}</th>
+            <th class="num">{{ t('accountStatementPage.balance') }}</th>
+            <th class="col-progress">{{ t('accountStatementPage.progress') }}</th>
+            <th>{{ t('accountStatementPage.dueDate') }}</th>
+            <th>{{ t('common.status') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data()?.details ?? []; track item.id) {
+            <tr [class.row-overdue]="isOverdue(item)">
+              <td class="mono">#{{ item.id }}</td>
+              <td class="col-grow">{{ item.supplierName }}</td>
+              <td class="mono">{{ item.guideNumber }}</td>
+              <td class="num">S/ {{ item.totalAmount | number:'1.2-2' }}</td>
+              <td class="num">S/ {{ item.paidAmount | number:'1.2-2' }}</td>
+              <td class="num amount" [class.balance-open]="item.balance > 0.01">S/ {{ item.balance | number:'1.2-2' }}</td>
+              <td class="col-progress">
+                <div class="progress" [attr.title]="rowPercent(item) + '%'">
+                  <div class="progress-bar" [class.full]="rowPercent(item) >= 100" [style.width.%]="rowPercent(item)"></div>
+                </div>
+                <span class="progress-label">{{ rowPercent(item) }}%</span>
+              </td>
+              <td>
+                @if (item.dueDate) {
+                  <span class="due" [class.due-overdue]="isOverdue(item)">
+                    @if (isOverdue(item)) { <app-icon name="clock" [size]="14" /> }
+                    {{ item.dueDate | date:'dd/MM/yyyy' }}
+                  </span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                <span class="status"
+                      [class.status-paid]="item.accountStatus === 'Paid'"
+                      [class.status-partial]="item.accountStatus === 'PartiallyPaid'"
+                      [class.status-pending]="item.accountStatus === 'Pending'">
+                  <i class="dot"></i>
+                  @if (item.accountStatus === 'Paid') { {{ t('accountPayables.statusPaid') }} }
+                  @else if (item.accountStatus === 'PartiallyPaid') { {{ t('accountPayables.statusPartial') }} }
+                  @else { {{ t('accountPayables.statusPending') }} }
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="empty-row">
+              <td colspan="9">
+                <div class="empty-state">
+                  <app-icon name="receipt" [size]="40" [strokeWidth]="1.5" />
+                  <p class="empty-title">{{ t('accountStatementPage.emptyTitle') }}</p>
+                  <p class="empty-hint">{{ t('accountStatementPage.emptyDetailHint') }}</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+
+        @if ((data()?.details ?? []).length) {
+          <tfoot>
+            <tr>
+              <td colspan="3">{{ t('accountStatementPage.pageTotals') }}</td>
+              <td class="num">S/ {{ detailTotals().total | number:'1.2-2' }}</td>
+              <td class="num">S/ {{ detailTotals().paid | number:'1.2-2' }}</td>
+              <td class="num amount">S/ {{ detailTotals().balance | number:'1.2-2' }}</td>
+              <td colspan="3"></td>
+            </tr>
+          </tfoot>
+        }
+      </table>
+    </div>
+
+  } @else {
+    <div class="table-container">
+      <div class="empty-state">
+        <app-icon name="receipt" [size]="40" [strokeWidth]="1.5" />
+        <p class="empty-title">{{ t('accountStatementPage.noSelectionTitle') }}</p>
+        <p class="empty-hint">{{ t('accountStatementPage.emptyHelp') }}</p>
+      </div>
+    </div>
+  }
+</div>
+</ng-container>

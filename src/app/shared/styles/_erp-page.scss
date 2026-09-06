@@ -1,0 +1,665 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Sistema visual de las páginas de listado (Finanzas / Comerciante).
+//
+// Se usa JUNTO a `maestros/_master-list.scss`, que aporta la base heredada
+// (tarjeta, tabla, botones, badges, modal). Este partial solo añade lo nuevo:
+// tarjeta de filtros, estados con punto, barras de avance, estado vacío,
+// esqueleto de carga y los detalles de modal.
+//
+//   @use '../../maestros/master-list' as *;
+//   @use '../../../shared/styles/erp-page' as *;
+//
+// Nada aquí define variables ni mixins, así que ambos pueden entrar con `as *`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Encabezado ────────────────────────────────────────────
+.page-header .page-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  .record-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.btn-icon-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// ── Panel de filtros ──────────────────────────────────────
+.filter-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.filter-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  .filter-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+  }
+
+  .filter-chip {
+    padding: 3px 9px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--badge-active-bg);
+    color: var(--badge-active-text);
+  }
+
+  // Al extremo derecho, inerte cuando no hay nada que limpiar.
+  .btn-link {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: var(--primary-color);
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: var(--bg-surface-hover); }
+    &:disabled { color: var(--text-muted); cursor: default; }
+  }
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+  }
+
+  input, select {
+    width: 100%;
+    height: 38px;
+    padding: 0 11px;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    font-size: 14px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    box-sizing: border-box;
+
+    &:focus { outline: none; border-color: var(--primary-color); }
+  }
+}
+
+// Lupa embebida dentro del campo de búsqueda.
+.input-with-icon {
+  position: relative;
+
+  app-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  input { padding-left: 34px; }
+}
+
+// Control segmentado (presets de rango de fechas).
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  overflow: hidden;
+
+  button {
+    padding: 7px 14px;
+    border: none;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    &:not(:last-child) { border-right: 1px solid var(--border-color); }
+    &:hover:not(.active) { background: var(--bg-surface-hover); }
+    &.active {
+      background: var(--primary-color);
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}
+
+// ── Tabla ─────────────────────────────────────────────────
+table {
+  th, td { white-space: nowrap; }
+
+  // La cabecera queda fija al hacer scroll en listas largas.
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  // Cifras a la derecha y con ancho de dígito fijo, para comparar de un vistazo.
+  th.num, td.num { text-align: right; }
+  td.num { font-variant-numeric: tabular-nums; }
+  td.amount { font-weight: 600; }
+  td.muted, .muted { color: var(--text-muted); }
+  td.mono, .mono { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  td.nowrap { white-space: nowrap; }
+
+  // Absorbe el ancho sobrante para que las últimas columnas no floten
+  // en el borde derecho de la tabla.
+  th.col-grow, td.col-grow { width: 100%; white-space: normal; }
+  th.col-actions, td.col-actions { text-align: right; }
+  th.col-progress, td.col-progress { width: 1%; }
+
+  td.balance-open { color: var(--badge-inactive-text); }
+
+  // Vencida: se detecta sin leer la fila.
+  tr.row-overdue td:first-child { box-shadow: inset 3px 0 0 var(--badge-inactive-text); }
+
+  tfoot td {
+    border-top: 2px solid var(--border-color);
+    background: var(--table-header-bg);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    &.num { font-variant-numeric: tabular-nums; }
+    &.amount { color: var(--text-primary); font-size: 14px; }
+  }
+
+  tr.empty-row:hover { background: none; }
+}
+
+// ── Acciones de fila ──────────────────────────────────────
+.row-actions {
+  display: inline-flex;
+  gap: 2px;
+
+  .act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-color);
+      color: var(--primary-color);
+    }
+    &:disabled { opacity: 0.28; cursor: not-allowed; }
+
+    &.act-danger:hover:not(:disabled) {
+      background: var(--alert-error-bg);
+      border-color: var(--badge-inactive-text);
+      color: var(--badge-inactive-text);
+    }
+  }
+}
+
+// ── Estados ───────────────────────────────────────────────
+// Punto + texto en vez de píldora rellena: el color informa sin gritar.
+// El ámbar del estado intermedio evita que "a medias" se lea como error.
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+.status-ok,
+.status-paid { color: var(--badge-active-text); .dot { background: var(--badge-active-text); } }
+.status-partial { color: #b26a00; .dot { background: #b26a00; } }
+.status-void,
+.status-pending { color: var(--badge-inactive-text); .dot { background: var(--badge-inactive-text); } }
+
+// Etiqueta neutra para clasificaciones que no son estados (tipo de pago, tipo de movimiento).
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.tag-good {
+  background: color-mix(in srgb, var(--badge-active-text) 12%, transparent);
+  border-color: color-mix(in srgb, var(--badge-active-text) 30%, transparent);
+  color: var(--badge-active-text);
+}
+.tag-warn {
+  background: color-mix(in srgb, var(--row-warning-text) 14%, transparent);
+  border-color: color-mix(in srgb, var(--row-warning-text) 32%, transparent);
+  color: var(--row-warning-text);
+}
+.tag-info {
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: var(--primary-color);
+}
+.tag-neutral {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+// ── Barra de avance ───────────────────────────────────────
+.col-progress {
+  .progress { display: inline-block; vertical-align: middle; }
+  .progress-label {
+    display: inline-block;
+    margin-left: 8px;
+    min-width: 34px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    text-align: right;
+  }
+}
+
+.progress {
+  width: 72px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-surface-hover);
+  overflow: hidden;
+
+  &.progress-lg { width: 100%; height: 9px; border-radius: 5px; }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: #b26a00;
+    transition: width 0.25s ease;
+
+    &.full { background: var(--badge-active-text); }
+  }
+}
+
+.progress-caption {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+// ── Vencimiento ───────────────────────────────────────────
+.due {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.due-overdue { color: var(--badge-inactive-text); font-weight: 600; }
+
+.due-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  &.due-overdue { color: var(--badge-inactive-text); font-weight: 600; }
+}
+
+// ── Estado vacío ──────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 48px 20px;
+  color: var(--text-muted);
+
+  .empty-title { margin: 6px 0 0; font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .empty-hint { margin: 0 0 8px; font-size: 13px; text-align: center; }
+}
+
+// ── Esqueleto de carga ────────────────────────────────────
+// Filas fantasma: la tabla mantiene su alto y no salta al llegar los datos.
+.skeleton td {
+  .bar {
+    display: block;
+    height: 11px;
+    border-radius: 6px;
+    background: var(--bg-surface-hover);
+    animation: erp-skeleton-pulse 1.4s ease-in-out infinite;
+  }
+  &:nth-child(3) .bar { width: 70%; }
+  &:last-child .bar { width: 60px; margin-left: auto; }
+}
+
+@keyframes erp-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton td .bar { animation: none; }
+  .progress .progress-bar { transition: none; }
+}
+
+// ── Modal ─────────────────────────────────────────────────
+.modal-wide {
+  width: 92%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+
+  .modal-body { overflow-y: auto; }
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  .modal-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  &:hover { color: var(--text-primary); }
+}
+
+.form-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+// `_master-list.scss` no define estos dos (solo existen en `_erp-list.scss`):
+// sin ellos el asterisco de obligatorio y el mensaje de error salen en color normal.
+.req { color: #e53935; margin-left: 2px; font-weight: 700; }
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #e53935;
+}
+
+.form-group {
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched,
+  textarea.ng-invalid.ng-touched { border-color: #e53935; }
+
+  select:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// Cabecera de comprobante: etiqueta pequeña arriba, valor debajo.
+.detail-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px 28px;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  background: var(--table-header-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+
+  .detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 14px;
+    min-width: 0;
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+    }
+    .tag, .status, .due { align-self: flex-start; }
+  }
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  th, td {
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  th {
+    background: var(--table-header-bg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  th.num, td.num { text-align: right; }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  tfoot td {
+    border-top: 2px solid var(--border-color);
+    border-bottom: none;
+    background: var(--table-header-bg);
+    font-weight: 600;
+    color: var(--text-secondary);
+    &.amount { color: var(--text-primary); font-size: 14px; }
+  }
+
+  // En modo "ver" la tabla cierra el modal: sin hueco extra antes del footer.
+  &:last-child { margin-bottom: 0; }
+}
+
+// ── Panel de importes ─────────────────────────────────────
+// Las cifras van juntas porque el dato útil es la comparación, no cada una suelta.
+.money-panel {
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.money-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px 24px;
+
+  .money {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+    strong {
+      font-size: 20px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+  }
+
+  .money-paid strong { color: var(--badge-active-text); }
+  .money-balance strong { color: var(--badge-inactive-text); font-size: 24px; }
+}
+
+// Dentro del panel las cifras van seguidas de la barra de avance: necesita el aire.
+// Fuera del panel el contenedor pone su propio espaciado.
+.money-panel .money-grid { margin-bottom: 14px; }
+
+// Un único importe destacado (cuando no hay comparación que hacer).
+.total-banner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 22%, transparent);
+
+  span {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+  }
+  strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ── Títulos de sección dentro del modal ───────────────────
+h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+}
+
+// ── Formulario en línea (alta rápida dentro de un modal) ──
+.inline-panel {
+  padding: 16px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: var(--table-header-bg);
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+
+  .inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 0;
+      flex: 1 1 130px;
+      min-width: 0;
+
+      &.grow-2 { flex: 2 1 190px; }
+      &.narrow { flex: 0 0 105px; }
+
+      label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-muted);
+        margin-bottom: 0;
+      }
+      select, input { height: 38px; padding: 0 11px; border-radius: 7px; }
+    }
+
+    > .btn { height: 38px; padding: 0 16px; white-space: nowrap; }
+  }
+}
+
+// ── Botón destructivo ─────────────────────────────────────
+.btn-danger {
+  background: #c62828;
+  color: #fff;
+  &:hover { background: #a71d1d; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Tema oscuro ───────────────────────────────────────────
+// `:host-context` y no `[data-theme="dark"] &`: el atributo vive en <html>, fuera
+// del componente, y la encapsulación emulada le añadiría [_ngcontent] — nunca casaría.
+:host-context([data-theme="dark"]) {
+  .status-partial { color: #ffb74d; .dot { background: #ffb74d; } }
+  .progress .progress-bar { background: #ffb74d; }
+  .money-paid strong { color: #66bb6a; }
+  .tag-good { color: #66bb6a; border-color: color-mix(in srgb, #66bb6a 34%, transparent); }
+  .tag-warn {
+    color: #ffb74d;
+    background: color-mix(in srgb, #ffb74d 12%, transparent);
+    border-color: color-mix(in srgb, #ffb74d 30%, transparent);
+  }
+}
+
+@media (max-width: 720px) {
+  .segmented { width: 100%; button { flex: 1; } }
+}

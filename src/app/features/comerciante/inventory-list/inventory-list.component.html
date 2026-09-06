@@ -1,0 +1,72 @@
+<ng-container *transloco="let t">
+<div class="master-list-page">
+  <div class="page-header">
+    <h1>{{ t('inventory.title') }}</h1>
+    <button class="btn btn-primary" (click)="goCreate()">{{ t('inventory.new') }}</button>
+  </div>
+
+  <div class="toolbar">
+    <label class="filter-checkbox">
+      <input type="checkbox" [checked]="filterLowStock()" (change)="toggleLowStock()" />
+      {{ t('inventory.lowStockOnly') }}
+    </label>
+  </div>
+
+  @if (message(); as msg) {
+    <div class="alert" [class.alert-success]="msg.type === 'success'" [class.alert-error]="msg.type === 'error'">
+      {{ msg.text }}
+    </div>
+  }
+
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading">{{ t('common.loading') }}</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t('common.id') }}</th>
+            <th>{{ t('inventory.stall') }}</th>
+            <th>{{ t('inventory.product') }}</th>
+            <th>{{ t('inventory.logisticUnit') }}</th>
+            <th>{{ t('inventory.currentStock') }}</th>
+            <th>{{ t('inventory.minimumStock') }}</th>
+            <th>{{ t('inventory.averageCost') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('inventory.lastUpdated') }}</th>
+            <th>{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of pagedItems(); track item.id) {
+            <tr [class.low-stock]="item.currentStock <= item.minimumStock">
+              <td>{{ item.id }}</td>
+              <td>{{ item.stallCode }}</td>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.logisticUnitName }}</td>
+              <td>{{ item.currentStock }}</td>
+              <td>{{ item.minimumStock }}</td>
+              <td>{{ item.averageCost | number: '1.2-2' }}</td>
+              <td>{{ item.status ? t('common.active') : t('common.inactive') }}</td>
+              <td>{{ item.lastUpdated | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions">
+                <button class="btn-icon" [title]="t('common.view')" (click)="goView(item)">👁️</button>
+                <button class="btn btn-secondary btn-sm" (click)="goEdit(item)">{{ t('inventory.editMinStock') }}</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="10" class="empty">{{ t('inventory.notFound') }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <app-pagination
+    [totalItems]="items().length"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
+</div>
+</ng-container>
